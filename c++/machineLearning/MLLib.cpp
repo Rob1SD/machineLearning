@@ -4,6 +4,7 @@ extern "C" {
 		return new double[inputdimension];
 	}
 	__declspec(dllexport) void RemoveLinearModel(double *model) {
+		delete[] model;  
 	}
 	__declspec(dllexport) int LinearFirstRegression(double *model, double *inputs, int inputsSize, int inputSize, double *outputs, int outputsSize) {
 		return 888;
