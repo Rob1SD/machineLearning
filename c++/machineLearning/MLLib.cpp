@@ -46,14 +46,14 @@ extern "C" {
 
 		double weightedSum = 0;
 
-		// On calcule la somme pondï¿½rï¿½e des valeurs * poids
+		// On calcule la somme pondérée des valeurs * poids
 		for (int i = 0; i < inputSize; i++) {
 			weightedSum += input[i] * model[i];
 		}
 
 		//printf("\nSomme ponderee : %lf", weightedSum);
 
-		// On ajoute ï¿½ la somme pondï¿½rï¿½e le biais (qui sera en * 1 donc pas besoin de calcul)
+		// On ajoute à la somme pondérée le biais (qui sera en * 1 donc pas besoin de calcul)
 		weightedSum += model[inputSize];
 
 		//printf("\nSomme ponderee apres ajout du biais : %lf", weightedSum);
@@ -73,29 +73,30 @@ extern "C" {
 		int inputSize, double *outputs, int outputsSize, double step) {
 
 		for (int i = 0; i < inputsSize; i++) {
-			// On rï¿½cupï¿½re la valeur donnï¿½e par le perceptron actuellement
+			// On récupère la valeur donnée par le perceptron actuellement
 			double actualValue = LinearClassification(model, inputs[i], inputSize);
 
 			for (int j = 0; j < inputSize + 1; j++) {
-				// On calcule la diffï¿½rence entre valeur attendue - valeur du perceptron
+				// On calcule la différence entre valeur attendue - valeur du perceptron
 				double resultDiff = outputs[i] - actualValue;
 
 				// On multiplie par le pas d'apprentissage
 				resultDiff *= step;
 
-				// Si on est dans les poids rï¿½gulier (le biais sera en * 1 donc pas besoin)
+				// Si on est dans les poids régulier (le biais sera en * 1 donc pas besoin)
 				if (j < inputSize) {
 					// On multiplie par la valeur de l'exemple correspondant au poid
 					resultDiff *= inputs[i][j];
 				}
 
-				// On ajoute le calcul au paramï¿½tre du modï¿½le
+				// On ajoute le calcul au paramètre du modèle
 				model[j] = model[j] + resultDiff;
 			}
 		}
 		return 1;
 	}
 
+	/*int main(int argc, char *argv[])
 	{
 		double* model = CreateModel(3);
 		double **myarray = new double*[2];
@@ -116,4 +117,5 @@ extern "C" {
 		int res = FitRosenblatt(model, myarray, 2, 2, outputs, 2, 0.5);
 
 		LinearClassification(model, new double[2]{ 10, 2 }, 2);
+	}*/
 }
