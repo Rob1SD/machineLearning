@@ -174,7 +174,7 @@ extern "C" {
 		return 1;
 	}
 
-	/*int main(int argc, char *argv[])
+	int main(int argc, char *argv[])
 	{
 	double* model = CreateModel(3);
 
@@ -194,5 +194,5 @@ extern "C" {
 	char* temp = new char[50];
 	scanf_s("%s", &temp);
 
-	}*/
+	}
 }
