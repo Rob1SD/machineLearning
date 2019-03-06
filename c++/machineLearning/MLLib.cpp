@@ -1,9 +1,9 @@
-#include <iostream>
-#include <Eigen\Eigen>
+//#include <iostream>
+//#include <Eigen\Eigen>
 extern "C" {
 	using namespace std;
-	using namespace Eigen;
-	#include<stdlib.h>
+	//using namespace Eigen;
+	#include <stdlib.h>
 	#include<stdio.h>
 	#include<math.h>
 	#include<ctime>

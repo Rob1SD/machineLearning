@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -26036,25 +26036,6 @@ MonoBehaviour:
   - {fileID: 839474939}
   - {fileID: 2061760985}
   - {fileID: 2085194660}
-  - {fileID: 1328410858}
-  - {fileID: 1945723390}
-  - {fileID: 1652000621}
-  - {fileID: 1449834150}
-  - {fileID: 190116492}
-  - {fileID: 782549259}
-  - {fileID: 798666865}
-  - {fileID: 783348463}
-  - {fileID: 1984103050}
-  - {fileID: 148069477}
-  - {fileID: 1561393197}
-  - {fileID: 1165738783}
-  - {fileID: 2100060152}
-  - {fileID: 801133642}
-  - {fileID: 1939756428}
-  - {fileID: 632660838}
-  - {fileID: 2024817152}
-  - {fileID: 611833023}
-  - {fileID: 554745669}
   - {fileID: 616267110}
   - {fileID: 1416715125}
   - {fileID: 1135586275}
@@ -26062,24 +26043,6 @@ MonoBehaviour:
   - {fileID: 642217406}
   - {fileID: 1506684981}
   - {fileID: 1818540388}
-  - {fileID: 1937250628}
-  - {fileID: 993012774}
-  - {fileID: 674544245}
-  - {fileID: 47076569}
-  - {fileID: 1105877574}
-  - {fileID: 1147438936}
-  - {fileID: 690845283}
-  - {fileID: 1911153435}
-  - {fileID: 499735688}
-  - {fileID: 1084776192}
-  - {fileID: 350236036}
-  - {fileID: 1467648140}
-  - {fileID: 408815134}
-  - {fileID: 1692520341}
-  - {fileID: 164114981}
-  - {fileID: 1659901699}
-  - {fileID: 1756699233}
-  - {fileID: 512332688}
   spheresToMove:
   - {fileID: 1733133911}
   - {fileID: 735639312}
