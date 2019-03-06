@@ -15,10 +15,6 @@ extern "C" {
 		return min + scale * (max - min);      /* [min, max] */
 	}
 
-	__declspec(dllexport) int Return42() {
-		return 42;
-	}
-
 	__declspec(dllexport) double *CreateModel(int inputdimension) {
 		double* array = new double[inputdimension];
 
@@ -26,17 +22,7 @@ extern "C" {
 		
 			double seed = randomDouble(-1, 1);
 
-			int signRand = 1;
-
-			if (signRand == 0) {
-				array[i] = seed * -1;
-			}
-			else if (signRand == 1) {
-				array[i] = seed;
-			}
-			else {
-				array[i] = -12;
-			}
+			array[i] = seed;
 		}
 
 		return array;
@@ -50,7 +36,7 @@ extern "C" {
 	}
 
 	__declspec(dllexport) double LinearClassification(double *model, double *input, int inputSize) {
-		/*printf("\n\nClassification lineaire\nValeurs d'entree : ");
+		printf("\n\nClassification lineaire\nValeurs d'entree : ");
 
 		for (int i = 0; i < inputSize; i++) {
 			if (i == inputSize - 1) {
@@ -73,7 +59,7 @@ extern "C" {
 		}
 
 		printf("\nValeur du biais : %lf", model[inputSize]);
-		*/
+		
 
 		double weightedSum = 0;
 
@@ -82,17 +68,17 @@ extern "C" {
 			weightedSum += input[i] * model[i];
 		}
 
-		//printf("\nSomme ponderee : %lf", weightedSum);
+		printf("\nSomme ponderee : %lf", weightedSum);
 
 		// On ajoute à la somme pondérée le biais (qui sera en * 1 donc pas besoin de calcul)
 		weightedSum += model[inputSize];
 
-		//printf("\nSomme ponderee apres ajout du biais : %lf", weightedSum);
+		printf("\nSomme ponderee apres ajout du biais : %lf", weightedSum);
 
 		// On effectue la fonction signe (si > 0 vaut 1, si < 0 vaut -1, sinon 0)
 		double signWS = (weightedSum > 0 ? 1.0 : (weightedSum < 0 ? -1.0 : 0));
 
-		//printf("\nSomme ponderee apres fonction signe : %lf", signWS);
+		printf("\nSomme ponderee apres fonction signe : %lf", signWS);
 
 		return signWS;
 	}
@@ -130,6 +116,8 @@ extern "C" {
 				// On récupère la valeur donnée par le perceptron actuellement
 				double actualValue = LinearClassification(model, inputs[i], inputSize);
 
+				printf("\nValeur attendue : %lf", outputs[i]);
+
 				for (int j = 0; j < inputSize + 1; j++) {
 					// On calcule la différence entre valeur attendue - valeur du perceptron
 					double resultDiff = outputs[i] - actualValue;
@@ -151,52 +139,26 @@ extern "C" {
 
 		return 1;
 	}
-	/*
-	int main(int argc, char *argv[])
+	
+	/*int main(int argc, char *argv[])
 	{
 		double* model = CreateModel(3);
-		double **myarray = new double*[2];
 
-		myarray[0] = new double[2];
-		myarray[1] = new double[2];
-
-		myarray[0][0] = 2;
-		myarray[0][1] = 2;
-
-		myarray[1][0] = 13;
-		myarray[1][1] = 27;
-
-		double *outputs = new double[2];
-		outputs[0] = 1;
-		outputs[1] = -1;
-
-		//int res = FitRosenblatt(model, myarray, 2, 2, outputs, 2, 0.01, 10000);
-
-		//LinearClassification(model, new double[2]{ 10, 2 }, 2);
-
-		double* array = new double[9];
+		double* array = new double[6];
 
 		array[0] = 1;
 		array[1] = 2;
-		array[2] = 3;
-		array[3] = 4;
-		array[4] = 5;
-		array[5] = 6;
-		array[6] = 7;
-		array[7] = 8;
-		array[8] = 9;
+		array[2] = 5;
+		array[3] = 3;
+		array[4] = 6;
+		array[5] = 3;
 
-		double** newArray = SingleArrayToDoubleArray(array, 9, 3);
+		int res = FitRosenblatt(model, array, 3, 2, new double[3] {1, -1, -1} , 3, 0.01, 500);
 
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < sizeof(newArray[i]); j++) {
-				printf("%lf, ", newArray[i][j]);
-			}
-			printf("\n");
-		}
+		LinearClassification(model, new double[2]{ 3, 1 }, 2);
 
 		char* temp = new char[50];
 		scanf_s("%s", &temp);
-	}
-	*/
+
+	}*/
 }
