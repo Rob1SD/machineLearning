@@ -1,5 +1,8 @@
+#include <iostream>
+#include <Eigen/Eigen>
 extern "C" {
 	using namespace std;
+	using namespace Eigen;
 
 	__declspec(dllexport) double *CreateModel(int inputdimension) {
 		double* array = new double[inputdimension];
@@ -96,7 +99,7 @@ extern "C" {
 		return 1;
 	}
 
-	/*int main(int argc, char *argv[])
+	int main(int argc, char *argv[])
 	{
 		double* model = CreateModel(3);
 		double **myarray = new double*[2];
@@ -117,5 +120,5 @@ extern "C" {
 		int res = FitRosenblatt(model, myarray, 2, 2, outputs, 2, 0.5);
 
 		LinearClassification(model, new double[2]{ 10, 2 }, 2);
-	}*/
+	}
 }
