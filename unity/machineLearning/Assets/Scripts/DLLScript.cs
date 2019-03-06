@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class DLLScript : MonoBehaviour
 {
-    [DllImport("Assets/MLLib.dll")]
+  /*  [DllImport("Assets/MLLib.dll")]
     public static extern double[] CreateModel(int inputdimension);
     [DllImport("Assets/MLLib.dll")]
     public static extern void RemoveLinearModel(double[] model);
@@ -14,7 +14,7 @@ public class DLLScript : MonoBehaviour
     public static extern int LinearFirstRegression(double[] model, double[] inputs, int inputsSize, int inputSize, double[] output);
     [DllImport("Assets/MLLib.dll")]
     [DllImport("Assets/MLLib.dll")]
-    [DllImport("Assets/MLLib.dll")]
+    [DllImport("Assets/MLLib.dll")]*/
     // Start is called before the first frame update
     void Start()
     {

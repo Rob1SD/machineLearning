@@ -1,12 +1,11 @@
 
 extern "C" {
+	using namespace std;
+
 	#include<stdlib.h>
 	#include<stdio.h>
 	#include<math.h>
 	#include<ctime>
-
-
-	using namespace std;
 
 	// Generate a random double number
 	double randomDouble(float min, float max)
@@ -19,7 +18,7 @@ extern "C" {
 		double* array = new double[inputdimension];
 
 		for (int i = 0; i < inputdimension; i++) {
-		
+
 			double seed = randomDouble(-1, 1);
 
 			array[i] = seed;
@@ -59,7 +58,7 @@ extern "C" {
 		}
 
 		printf("\nValeur du biais : %lf", model[inputSize]);
-		
+
 
 		double weightedSum = 0;
 
@@ -139,8 +138,8 @@ extern "C" {
 
 		return 1;
 	}
-	
-	/*int main(int argc, char *argv[])
+
+	int main(int argc, char *argv[])
 	{
 		double* model = CreateModel(3);
 
@@ -156,9 +155,10 @@ extern "C" {
 		int res = FitRosenblatt(model, array, 3, 2, new double[3] {1, -1, -1} , 3, 0.01, 500);
 
 		LinearClassification(model, new double[2]{ 3, 1 }, 2);
+		LinearClassification(model, new double[2]{ 1, 5 }, 2);
 
 		char* temp = new char[50];
 		scanf_s("%s", &temp);
 
-	}*/
+	}
 }
