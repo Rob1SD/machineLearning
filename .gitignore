@@ -2,6 +2,7 @@
 /unity/machineLearning/Logs/*
 /unity/machineLearning/Temp/*
 /unity/machineLearning/obj/*
+/unity/machineLearning/obj/.vs/*
 /c++/machineLearning/.vs/machineLearning/v15
 /c++/machineLearning/x64/Release/vc141.pdb
 /c++/machineLearning/x64/Release/MLLib.obj
@@ -22,3 +23,5 @@
 /c++/machineLearning/x64/Debug/machineLearning.lib
 /c++/machineLearning/x64/Debug/machineLearning.ilk
 /c++/machineLearning/x64/Debug/machineLearning.exp
+*.csproj
+*.sln
