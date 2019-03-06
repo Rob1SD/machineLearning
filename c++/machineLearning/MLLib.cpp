@@ -1,11 +1,42 @@
+
 extern "C" {
+	#include<stdlib.h>
+	#include<stdio.h>
+	#include<math.h>
+	#include<ctime>
+
+
 	using namespace std;
+
+	// Generate a random double number
+	double randomDouble(float min, float max)
+	{
+		double scale = rand() / (double)RAND_MAX; /* [0, 1.0] */
+		return min + scale * (max - min);      /* [min, max] */
+	}
+
+	__declspec(dllexport) int Return42() {
+		return 42;
+	}
 
 	__declspec(dllexport) double *CreateModel(int inputdimension) {
 		double* array = new double[inputdimension];
 
 		for (int i = 0; i < inputdimension; i++) {
-			array[i] = 0;
+		
+			double seed = randomDouble(-1, 1);
+
+			int signRand = 1;
+
+			if (signRand == 0) {
+				array[i] = seed * -1;
+			}
+			else if (signRand == 1) {
+				array[i] = seed;
+			}
+			else {
+				array[i] = -12;
+			}
 		}
 
 		return array;
@@ -69,34 +100,59 @@ extern "C" {
 		return .5;
 	}
 
-	__declspec(dllexport) int FitRosenblatt(double *model, double **inputs, int inputsSize,
-		int inputSize, double *outputs, int outputsSize, double step) {
+	double **SingleArrayToDoubleArray(double *arrayInputs, int arraySize, int inputsSize) {
+		int sizeOneInput = arraySize / inputsSize;
+
+		double** array = new double*[inputsSize];
+
+		int index = 0;
 
 		for (int i = 0; i < inputsSize; i++) {
-			// On récupère la valeur donnée par le perceptron actuellement
-			double actualValue = LinearClassification(model, inputs[i], inputSize);
+			double* temp = new double[sizeOneInput];
 
-			for (int j = 0; j < inputSize + 1; j++) {
-				// On calcule la différence entre valeur attendue - valeur du perceptron
-				double resultDiff = outputs[i] - actualValue;
-
-				// On multiplie par le pas d'apprentissage
-				resultDiff *= step;
-
-				// Si on est dans les poids régulier (le biais sera en * 1 donc pas besoin)
-				if (j < inputSize) {
-					// On multiplie par la valeur de l'exemple correspondant au poid
-					resultDiff *= inputs[i][j];
-				}
-
-				// On ajoute le calcul au paramètre du modèle
-				model[j] = model[j] + resultDiff;
+			for (int j = 0; j < sizeOneInput; j++) {
+				temp[j] = arrayInputs[index];
+				index += 1;
 			}
+			array[i] = temp;
 		}
-		return 1;
+
+		return array;
 	}
 
-	/*int main(int argc, char *argv[])
+	__declspec(dllexport) int FitRosenblatt(double *model, double *arrayInputs, int inputsSize,
+		int inputSize, double *outputs, int outputsSize, double step, int iterations) {
+
+		double **inputs = SingleArrayToDoubleArray(arrayInputs, inputsSize * inputSize, inputsSize);
+
+		for (int j = 0; j < iterations; j++) {
+			for (int i = 0; i < inputsSize; i++) {
+				// On récupère la valeur donnée par le perceptron actuellement
+				double actualValue = LinearClassification(model, inputs[i], inputSize);
+
+				for (int j = 0; j < inputSize + 1; j++) {
+					// On calcule la différence entre valeur attendue - valeur du perceptron
+					double resultDiff = outputs[i] - actualValue;
+
+					// On multiplie par le pas d'apprentissage
+					resultDiff *= step;
+
+					// Si on est dans les poids régulier (le biais sera en * 1 donc pas besoin)
+					if (j < inputSize) {
+						// On multiplie par la valeur de l'exemple correspondant au poid
+						resultDiff *= inputs[i][j];
+					}
+
+					// On ajoute le calcul au paramètre du modèle
+					model[j] = model[j] + resultDiff;
+				}
+			}
+		}
+
+		return 1;
+	}
+	/*
+	int main(int argc, char *argv[])
 	{
 		double* model = CreateModel(3);
 		double **myarray = new double*[2];
@@ -114,8 +170,33 @@ extern "C" {
 		outputs[0] = 1;
 		outputs[1] = -1;
 
-		int res = FitRosenblatt(model, myarray, 2, 2, outputs, 2, 0.5);
+		//int res = FitRosenblatt(model, myarray, 2, 2, outputs, 2, 0.01, 10000);
 
-		LinearClassification(model, new double[2]{ 10, 2 }, 2);
-	}*/
+		//LinearClassification(model, new double[2]{ 10, 2 }, 2);
+
+		double* array = new double[9];
+
+		array[0] = 1;
+		array[1] = 2;
+		array[2] = 3;
+		array[3] = 4;
+		array[4] = 5;
+		array[5] = 6;
+		array[6] = 7;
+		array[7] = 8;
+		array[8] = 9;
+
+		double** newArray = SingleArrayToDoubleArray(array, 9, 3);
+
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < sizeof(newArray[i]); j++) {
+				printf("%lf, ", newArray[i][j]);
+			}
+			printf("\n");
+		}
+
+		char* temp = new char[50];
+		scanf_s("%s", &temp);
+	}
+	*/
 }
