@@ -23,5 +23,6 @@
 /c++/machineLearning/x64/Debug/machineLearning.lib
 /c++/machineLearning/x64/Debug/machineLearning.ilk
 /c++/machineLearning/x64/Debug/machineLearning.exp
-*.csproj
-*.sln
+./*.csproj
+./*.sln
+/unity/machineLearning/machineLearning.sln

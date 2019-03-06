@@ -1,11 +1,12 @@
 
 extern "C" {
-	using namespace std;
+#include<stdlib.h>
+#include<stdio.h>
+#include<math.h>
+#include<ctime>
 
-	#include<stdlib.h>
-	#include<stdio.h>
-	#include<math.h>
-	#include<ctime>
+
+	using namespace std;
 
 	// Generate a random double number
 	double randomDouble(float min, float max)
@@ -117,7 +118,7 @@ extern "C" {
 
 				printf("\nValeur attendue : %lf", outputs[i]);
 
-				for (int j = 0; j < inputSize + 1; j++) {
+				for (int l = 0; l < inputSize + 1; l++) {
 					// On calcule la différence entre valeur attendue - valeur du perceptron
 					double resultDiff = outputs[i] - actualValue;
 
@@ -125,13 +126,13 @@ extern "C" {
 					resultDiff *= step;
 
 					// Si on est dans les poids régulier (le biais sera en * 1 donc pas besoin)
-					if (j < inputSize) {
+					if (l < inputSize) {
 						// On multiplie par la valeur de l'exemple correspondant au poid
-						resultDiff *= inputs[i][j];
+						resultDiff *= inputs[i][l];
 					}
 
 					// On ajoute le calcul au paramètre du modèle
-					model[j] = model[j] + resultDiff;
+					model[l] = model[l] + resultDiff;
 				}
 			}
 		}
@@ -139,26 +140,25 @@ extern "C" {
 		return 1;
 	}
 
-	int main(int argc, char *argv[])
+	/*int main(int argc, char *argv[])
 	{
-		double* model = CreateModel(3);
+	double* model = CreateModel(3);
 
-		double* array = new double[6];
+	double* array = new double[6];
 
-		array[0] = 1;
-		array[1] = 2;
-		array[2] = 5;
-		array[3] = 3;
-		array[4] = 6;
-		array[5] = 3;
+	array[0] = 1;
+	array[1] = 2;
+	array[2] = 5;
+	array[3] = 3;
+	array[4] = 6;
+	array[5] = 3;
 
-		int res = FitRosenblatt(model, array, 3, 2, new double[3] {1, -1, -1} , 3, 0.01, 500);
+	int res = FitRosenblatt(model, array, 3, 2, new double[3] {1, -1, -1} , 3, 0.01, 500);
 
-		LinearClassification(model, new double[2]{ 3, 1 }, 2);
-		LinearClassification(model, new double[2]{ 1, 5 }, 2);
+	LinearClassification(model, new double[2]{ 3, 1 }, 2);
 
-		char* temp = new char[50];
-		scanf_s("%s", &temp);
+	char* temp = new char[50];
+	scanf_s("%s", &temp);
 
-	}
+	}*/
 }
