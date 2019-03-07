@@ -41,6 +41,7 @@ public class mainScript : MonoBehaviour
                 ActionForClassification();
                 break;
             case "REGRESSION":
+                ActionForRegression();
                 break;
         }
     }
@@ -48,8 +49,6 @@ public class mainScript : MonoBehaviour
     void ActionForClassification()
     {
         model = CreateModel(3);
-
-
 
         int tailleSphereToTrain = spheresToTrain.Length;
         double[] arrayInputs = new double[tailleSphereToTrain * 2];
@@ -72,7 +71,7 @@ public class mainScript : MonoBehaviour
                 outputs[i] = -1;
             }
         }
-        var rawArray = new double[3];
+
         int result = FitLinearClassification(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain, 0.01, 10000);
         int tailleSphereToMove = spheresToMove.Length;
         for (int i = 0; i < tailleSphereToMove; ++i)
@@ -89,8 +88,6 @@ public class mainScript : MonoBehaviour
     {
         model = CreateModel(3);
 
-
-
         int tailleSphereToTrain = spheresToTrain.Length;
         double[] arrayInputs = new double[tailleSphereToTrain * 2];
         var pos = 0;
@@ -112,7 +109,7 @@ public class mainScript : MonoBehaviour
                 outputs[i] = -1;
             }
         }
-        var rawArray = new double[3];
+
         int result = FitLinearRegression(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain);
         int tailleSphereToMove = spheresToMove.Length;
         for (int i = 0; i < tailleSphereToMove; ++i)
