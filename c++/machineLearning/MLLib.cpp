@@ -206,6 +206,12 @@ extern "C" {
 			}
 		}
 
+		double temp = model[(LineRetour * colRetour) - 1];
+
+		model[(LineRetour * colRetour) - 1] = model[0];
+
+		model[0] = temp;
+
 		return 1;
 	}
 

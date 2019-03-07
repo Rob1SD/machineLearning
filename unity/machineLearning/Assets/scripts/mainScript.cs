@@ -91,6 +91,7 @@ public class mainScript : MonoBehaviour
             arrayInputs[pos + 1] = spheresToTrain[i].position.z;
             pos += 2;
         }
+
         double[] outputs = new double[tailleSphereToTrain];
         for (int i = 0; i < tailleSphereToTrain; ++i)
         {
