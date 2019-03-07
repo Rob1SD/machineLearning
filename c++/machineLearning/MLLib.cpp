@@ -1,8 +1,8 @@
-//#include <iostream>
-//#include <Eigen\Eigen>
+#include <iostream>
+#include <Eigen\Eigen>
 extern "C" {
 	using namespace std;
-	//using namespace Eigen;
+	using namespace Eigen;
 	#include <stdlib.h>
 	#include<stdio.h>
 	#include<math.h>
@@ -33,40 +33,6 @@ extern "C" {
 	}
 	__declspec(dllexport) void RemoveLinearModel(double *model) {
 		delete[] model;
-	}
-	///X : la matrice des points avec X et Z
-	///Y : la matrice des points avec Y
-	///W : le model resultant de l'opération du pdf
-	///impossile de retourner un objet MatrixXd donc je parse la matrice en tableau de double avec colRetour et lineRetour pour préciser la taille des colonnes et ligne
-	__declspec(dllexport) int LinearFirstRegression(double *X, int XCol, int XLin, double* Y,int YLin,double *W,int* colRetour,int* LineRetour) {
-		//on init nos matrice en se basant sur les tableaux de double
-		MatrixXd MatX(XLin, XCol+1);//avec une colone en plus
-		for (int i = 0; i < XLin; i++) {
-			for (int j = 0; j < XCol; j++) {
-				MatX(i, j) = X[(i*XCol) + j];				
-			}
-			MatX(i, XCol) = 1;//on rajoute le 1 dans la dernière colone
-		}
-		MatrixXd MatY(YLin, 1);
-		for (int i = 0; i< YLin; i++) {
-			MatY(i, 0) = Y[i];
-		}
-
-		//calcule du pdf
-		MatrixXd result = ((MatX.transpose()*MatX).inverse()*MatX.transpose())*MatY;
-
-		//on renseigne le format de la matrice de resultat pour pouvoir parser le tableau de double qu'on vas renvoyer en matrice
-		*colRetour = result.cols();
-		*LineRetour = result.rows();
-
-		//on parse la matrice en tableau de double
-		W = new double[*colRetour * *LineRetour];
-		for (int i = 0; i < *LineRetour; i++) {
-			for (int j = 0; j < *colRetour; j++) {
-				W[(i * *colRetour) + j] = result(i, j);
-			}
-		}
-		return 1;
 	}
 
 	__declspec(dllexport) double LinearClassification(double *model, double *input, int inputSize) {
@@ -117,7 +83,46 @@ extern "C" {
 		return signWS;
 	}
 	__declspec(dllexport) double LinearRegression(double *model, double *input, int inputSize) {
-		return .5;
+		printf("\n\nRégression lineaire\nValeurs d'entree : ");
+
+		for (int i = 0; i < inputSize; i++) {
+			if (i == inputSize - 1) {
+				printf("%lf", input[i]);
+			}
+			else {
+				printf("%lf,", input[i]);
+			}
+		}
+
+		printf("\nValeurs des poids : ");
+
+		for (int i = 0; i < inputSize; i++) {
+			if (i == inputSize - 1) {
+				printf("%lf", model[i]);
+			}
+			else {
+				printf("%lf,", model[i]);
+			}
+		}
+
+		printf("\nValeur du biais : %lf", model[inputSize]);
+
+
+		double weightedSum = 0;
+
+		// On calcule la somme pondérée des valeurs * poids
+		for (int i = 0; i < inputSize; i++) {
+			weightedSum += input[i] * model[i];
+		}
+
+		printf("\nSomme ponderee : %lf", weightedSum);
+
+		// On ajoute à la somme pondérée le biais (qui sera en * 1 donc pas besoin de calcul)
+		weightedSum += model[inputSize];
+
+		printf("\nSomme ponderee apres ajout du biais : %lf", weightedSum);
+
+		return weightedSum;
 	}
 
 	double **SingleArrayToDoubleArray(double *arrayInputs, int arraySize, int inputsSize) {
@@ -140,7 +145,39 @@ extern "C" {
 		return array;
 	}
 
-	__declspec(dllexport) int FitRosenblatt(double *model, double *arrayInputs, int inputsSize,
+	__declspec(dllexport) int FitLinearRegression(double *model, double *arrayInputs, int inputsSize,
+		int inputSize, double *outputs, int outputsSize) {
+		//on init nos matrice en se basant sur les tableaux de double
+		MatrixXd MatX(inputsSize, inputSize + 1);//avec une colone en plus
+		for (int i = 0; i < inputsSize; i++) {
+			for (int j = 0; j < inputSize; j++) {
+				MatX(i, j) = arrayInputs[(i*inputSize) + j];
+			}
+			MatX(i, inputSize) = 1;//on rajoute le 1 dans la dernière colone
+		}
+		MatrixXd MatY(inputsSize, 1);
+		for (int i = 0; i < inputsSize; i++) {
+			MatY(i, 0) = outputs[i];
+		}
+
+		//calcule du pdf
+		MatrixXd result = ((MatX.transpose()*MatX).inverse()*MatX.transpose())*MatY;
+
+		//on renseigne le format de la matrice de resultat pour pouvoir parser le tableau de double qu'on vas renvoyer en matrice
+		int colRetour = result.cols();
+		int LineRetour = result.rows();
+
+		//on parse la matrice en tableau de double
+		model = new double[colRetour * LineRetour];
+		for (int i = 0; i < LineRetour; i++) {
+			for (int j = 0; j < colRetour; j++) {
+				model[(i * colRetour) + j] = result(i, j);
+			}
+		}
+		return 1;
+	}
+
+	__declspec(dllexport) int FitLinearClassification(double *model, double *arrayInputs, int inputsSize,
 		int inputSize, double *outputs, int outputsSize, double step, int iterations) {
 
 		double **inputs = SingleArrayToDoubleArray(arrayInputs, inputsSize * inputSize, inputsSize);
@@ -176,23 +213,27 @@ extern "C" {
 
 	int main(int argc, char *argv[])
 	{
-	double* model = CreateModel(3);
+		double* model = CreateModel(3);
 
-	double* array = new double[6];
+		for (int i = 0; i < 3; i++) {
+			printf("%lf, ", model[i]);
+		}
 
-	array[0] = 1;
-	array[1] = 2;
-	array[2] = 5;
-	array[3] = 3;
-	array[4] = 6;
-	array[5] = 3;
+		double* array = new double[6];
 
-	int res = FitRosenblatt(model, array, 3, 2, new double[3] {1, -1, -1} , 3, 0.01, 500);
+		array[0] = 1;
+		array[1] = 2;
+		array[2] = 5;
+		array[3] = 3;
+		array[4] = 6;
+		array[5] = 3;
 
-	LinearClassification(model, new double[2]{ 3, 1 }, 2);
+		int res = FitLinearRegression(model, array, 3, 2, new double[3] {0.5, -0.3, -0.6} , 3);
 
-	char* temp = new char[50];
-	scanf_s("%s", &temp);
+		LinearRegression(model, new double[2]{ 3, 1 }, 2);
+
+		char* temp = new char[50];
+		scanf_s("%s", &temp);
 
 	}
 }
