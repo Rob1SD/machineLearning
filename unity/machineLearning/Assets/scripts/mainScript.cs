@@ -17,6 +17,7 @@ public class mainScript : MonoBehaviour
     [DllImport("machineLearning")]
     public static extern int FitLinearClassification(IntPtr model, double[] arrayInputs, int inputsSize,
         int inputSize, double[] outputs, int outputsSize, double step, int iterations);
+
     [DllImport("machineLearning")]
     public static extern double LinearRegression(IntPtr model, double[] input, int inputSize);
     [DllImport("machineLearning")]
@@ -62,14 +63,7 @@ public class mainScript : MonoBehaviour
         double[] outputs = new double[tailleSphereToTrain];
         for (int i = 0; i < tailleSphereToTrain; ++i)
         {
-            if (spheresToTrain[i].position.y > 0)
-            {
-                outputs[i] = 1;
-            }
-            else
-            {
-                outputs[i] = -1;
-            }
+            outputs[i] = spheresToTrain[i].position.y > 0 ? 1 : -1;
         }
 
         int result = FitLinearClassification(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain, 0.01, 10000);
@@ -100,14 +94,7 @@ public class mainScript : MonoBehaviour
         double[] outputs = new double[tailleSphereToTrain];
         for (int i = 0; i < tailleSphereToTrain; ++i)
         {
-            if (spheresToTrain[i].position.y > 0)
-            {
-                outputs[i] = 1;
-            }
-            else
-            {
-                outputs[i] = -1;
-            }
+            outputs[i] = spheresToTrain[i].position.y;
         }
 
         int result = FitLinearRegression(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain);
