@@ -3,10 +3,10 @@
 extern "C" {
 	using namespace std;
 	using namespace Eigen;
-	#include <stdlib.h>
-	#include<stdio.h>
-	#include<math.h>
-	#include<ctime>
+#include <stdlib.h>
+#include<stdio.h>
+#include<math.h>
+#include<ctime>
 
 
 	using namespace std;
@@ -83,7 +83,7 @@ extern "C" {
 		return signWS;
 	}
 	__declspec(dllexport) double LinearRegression(double *model, double *input, int inputSize) {
-		printf("\n\nRégression lineaire\nValeurs d'entree : ");
+		printf("\n\nRegression lineaire\nValeurs d'entree : ");
 
 		for (int i = 0; i < inputSize; i++) {
 			if (i == inputSize - 1) {
@@ -145,35 +145,67 @@ extern "C" {
 		return array;
 	}
 
+	void DebugMatrix(MatrixXd matrix, const char* txt) {
+		printf("\n%s\n", txt);
+		for (int i = 0; i < matrix.rows(); i++) {
+			for (int j = 0; j < matrix.cols(); j++) {
+				printf("%lf,", matrix(i, j));
+			}
+			printf("\n");
+		}
+	}
+
 	__declspec(dllexport) int FitLinearRegression(double *model, double *arrayInputs, int inputsSize,
 		int inputSize, double *outputs, int outputsSize) {
 		//on init nos matrice en se basant sur les tableaux de double
 		MatrixXd MatX(inputsSize, inputSize + 1);//avec une colone en plus
 		for (int i = 0; i < inputsSize; i++) {
-			for (int j = 0; j < inputSize; j++) {
-				MatX(i, j) = arrayInputs[(i*inputSize) + j];
+			for (int j = 1; j < inputSize + 1; j++) {
+				MatX(i, j) = arrayInputs[(i*inputSize) + (j - 1)];
 			}
-			MatX(i, inputSize) = 1;//on rajoute le 1 dans la dernière colone
+			MatX(i, 0) = 1;//on rajoute le 1 dans la dernière colone
 		}
+
+		DebugMatrix(MatX, "matrice X");
+
 		MatrixXd MatY(inputsSize, 1);
 		for (int i = 0; i < inputsSize; i++) {
 			MatY(i, 0) = outputs[i];
 		}
 
-		//calcule du pdf
-		MatrixXd result = ((MatX.transpose()*MatX).inverse()*MatX.transpose())*MatY;
+		DebugMatrix(MatY, "matrice Y");
+
+		MatrixXd XTransposed = MatX.transpose();
+
+		DebugMatrix(XTransposed, "X^T");
+
+		MatrixXd XTransposedXMatX = XTransposed * MatX;
+
+		DebugMatrix(XTransposedXMatX, "(X^T)*X");
+
+		MatrixXd InverseXTransposedXMatX = XTransposedXMatX.inverse();
+
+		DebugMatrix(InverseXTransposedXMatX, "((X^T)*X)^-1");
+
+		MatrixXd InverseXTransposedXMatXxTransposedXMat = InverseXTransposedXMatX * XTransposed;
+
+		DebugMatrix(InverseXTransposedXMatXxTransposedXMat, "((X^T)*X)^-1 * (X^T)");
+
+		MatrixXd result = InverseXTransposedXMatXxTransposedXMat * MatY;
+
+		DebugMatrix(result, "(((X^T)*X)^-1 * (X^T)) * Y");
 
 		//on renseigne le format de la matrice de resultat pour pouvoir parser le tableau de double qu'on vas renvoyer en matrice
 		int colRetour = result.cols();
 		int LineRetour = result.rows();
 
 		//on parse la matrice en tableau de double
-		model = new double[colRetour * LineRetour];
 		for (int i = 0; i < LineRetour; i++) {
 			for (int j = 0; j < colRetour; j++) {
 				model[(i * colRetour) + j] = result(i, j);
 			}
 		}
+
 		return 1;
 	}
 
@@ -213,13 +245,9 @@ extern "C" {
 
 	int main(int argc, char *argv[])
 	{
-		double* model = CreateModel(3);
+		double* model = CreateModel(5);
 
-		for (int i = 0; i < 3; i++) {
-			printf("%lf, ", model[i]);
-		}
-
-		double* array = new double[6];
+		double* array = new double[8];
 
 		array[0] = 1;
 		array[1] = 2;
@@ -227,8 +255,10 @@ extern "C" {
 		array[3] = 3;
 		array[4] = 6;
 		array[5] = 3;
+		array[6] = 3;
+		array[7] = 3;
 
-		int res = FitLinearRegression(model, array, 3, 2, new double[3] {0.5, -0.3, -0.6} , 3);
+		int res = FitLinearRegression(model, array, 4, 2, new double[4]{ 0.12, -0.9, -0.75, 0.5 }, 4);
 
 		LinearRegression(model, new double[2]{ 3, 1 }, 2);
 

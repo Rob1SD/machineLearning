@@ -24937,6 +24937,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9f3e8aed12b2cf46986cde6b2928c34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  type: 
   spheresToTrain:
   - {fileID: 616267110}
   - {fileID: 1519328642}

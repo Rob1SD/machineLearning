@@ -53,8 +53,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\DLLScript.cs" />
-     <Compile Include="Assets\Scripts\DllWrapper.cs" />
      <Compile Include="Assets\Scripts\mainScript.cs" />
  <Reference Include="Unity.TextMeshPro.Editor">
  <HintPath>C:/Users/spyro/Documents/GitHub/machineLearning/unity/machineLearning/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
