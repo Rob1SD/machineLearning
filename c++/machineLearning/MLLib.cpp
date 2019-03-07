@@ -17,6 +17,31 @@ extern "C" {
 		double scale = rand() / (double)RAND_MAX; /* [0, 1.0] */
 		return min + scale * (max - min);      /* [min, max] */
 	}
+	double calulateX_j_l(int j, int l, double **X, double ***W, int *d) {
+		double result = 0;
+		for (int i = 0; i <= d[l-1]; ++i) {
+			result += W[l][i][j]*X[l-1][i] ;
+		}
+		return tanh(result);
+
+	}
+	double calculate_delta_j_LastCouche_classification(int j, int l, double **X, double *Y) {
+		return (1 - pow(X[l][j], 2))*(X[l][j]-Y[j]);
+	}
+	double calculate_delta_i_l(int i, int l, double **X, double ***W, int *d, double *Y, double **delta) {
+		double sum = 0;
+		for (int j = 1; j <= d[l]; ++j) {
+			sum += W[l][i][j] * delta[l][j];
+		}
+		return (1 - pow(X[l-1][i], 2))*sum;
+	}
+	void updateW(int i, int j, int l, double ***W, double **X, double **delta, double biais) {
+		W[l][i][j] = W[l][i][j] - biais * X[l - 1][i] * delta[l][j];
+	}
+	double calculate_delta_j_LastCouche_regression(int j, int l, double **X, double *Y) {
+		return X[l][j]-Y[j];
+	}
+	
 
 	__declspec(dllexport) double *CreateModel(int inputdimension) {
 		double* array = new double[inputdimension];
