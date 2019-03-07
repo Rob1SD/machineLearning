@@ -163,7 +163,7 @@ extern "C" {
 			for (int j = 1; j < inputSize + 1; j++) {
 				MatX(i, j) = arrayInputs[(i*inputSize) + (j - 1)];
 			}
-			MatX(i, 0) = 1;//on rajoute le 1 dans la dernière colone
+			MatX(i, 0) = 1;//on rajoute le 1 dans la première colone
 		}
 
 		DebugMatrix(MatX, "matrice X");
@@ -205,12 +205,19 @@ extern "C" {
 				model[(i * colRetour) + j] = result(i, j);
 			}
 		}
+		auto tmp = model[0];
 
+		for (int i = 0; i < (LineRetour * colRetour - 1); i++) {
+			model[i] = model[i + 1];
+		}
+
+		model[(LineRetour * colRetour) - 1] = tmp;
+/*
 		double temp = model[(LineRetour * colRetour) - 1];
 
 		model[(LineRetour * colRetour) - 1] = model[0];
 
-		model[0] = temp;
+		model[0] = temp;*/
 
 		return 1;
 	}
