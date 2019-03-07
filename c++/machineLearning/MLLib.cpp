@@ -222,6 +222,20 @@ extern "C" {
 		return 1;
 	}
 
+	void usePCM(double* data, double *result, int nbData) {
+
+	}
+	double ***W;
+	void trainPCM(int *neuroneParCouche, int nbCouche, double* data,int colSizeData,double *target,int colSizeDataTarget) {
+		W = new double**[nbCouche];//creer les couches
+		for (int i = 0; i < nbCouche; i++) {
+			W[i] = new double*[neuroneParCouche[i]];//creer les neurones dans chaque couche
+			for (int j = 0; j < neuroneParCouche[i]; j++) {
+				W[i][j] = new double(randomDouble(-1, 1));//init tout les poids entre -1 et 1
+			}
+		}
+
+	}
 	__declspec(dllexport) int FitLinearClassification(double *model, double *arrayInputs, int inputsSize,
 		int inputSize, double *outputs, int outputsSize, double step, int iterations) {
 
@@ -258,25 +272,63 @@ extern "C" {
 
 	int main(int argc, char *argv[])
 	{
-		double* model = CreateModel(5);
+		//double* model = CreateModel(5);
 
-		double* array = new double[8];
+		//double* array = new double[8];
 
-		array[0] = 1;
-		array[1] = 2;
-		array[2] = 5;
-		array[3] = 3;
-		array[4] = 6;
-		array[5] = 3;
-		array[6] = 3;
-		array[7] = 3;
+		//array[0] = 1;
+		//array[1] = 2;
+		//array[2] = 5;
+		//array[3] = 3;
+		//array[4] = 6;
+		//array[5] = 3;
+		//array[6] = 3;
+		//array[7] = 3;
 
-		int res = FitLinearRegression(model, array, 4, 2, new double[4]{ 0.12, -0.9, -0.75, 0.5 }, 4);
+		//int res = FitLinearRegression(model, array, 4, 2, new double[4]{ 0.12, -0.9, -0.75, 0.5 }, 4);
 
-		LinearRegression(model, new double[2]{ 3, 1 }, 2);
+		//LinearRegression(model, new double[2]{ 3, 1 }, 2);
 
-		char* temp = new char[50];
-		scanf_s("%s", &temp);
+		//char* temp = new char[50];
+		//scanf_s("%s", &temp);
+		int* neuronesTest = new int[3];
+		neuronesTest[0] = 2;
+		neuronesTest[1] = 5;
+		neuronesTest[2] = 5;
+		double *fakeData = new double[20];
+		fakeData[0] = .2;
+		fakeData[1] = 1.2;
+		fakeData[2] = 3.2;
+		fakeData[3] = 4.2;
+		fakeData[4] = 5.2;
+		fakeData[5] = 9.2;
+		fakeData[6] = 12.2;
+		fakeData[7] = 5.2;
+		fakeData[8] = .2;
+		fakeData[9] = 4.2;
 
+		fakeData[10] = .2;
+		fakeData[11] = 1.2;
+		fakeData[12] = 3.2;
+		fakeData[13] = 4.2;
+		fakeData[14] = 5.2;
+		fakeData[15] = 9.2;
+		fakeData[16] = 12.2;
+		fakeData[17] = 5.2;
+		fakeData[18] = 0.2;
+		fakeData[19] = 4.2;
+
+		double* fakeTarget = new double[10];
+		fakeTarget[0] = 1.2;
+		fakeTarget[1] = 7.2;
+		fakeTarget[2] = 5.2;
+		fakeTarget[3] = 12.2;
+		fakeTarget[4] = 9.2;
+		fakeTarget[5] = 5;
+		fakeTarget[6] =2.5;
+		fakeTarget[7] = 0.4;
+		fakeTarget[8] = 9.2;
+		fakeTarget[9] = 7.6;
+		trainPCM(neuronesTest, 3, fakeData, 10, fakeTarget, 10);
 	}
 }
