@@ -267,7 +267,11 @@ extern "C" {
 		delete[] delta;
 
 	}
-	void trainPCM(int *neuroneParCouche, int nbCouche, double* data, int colSizeData, int lineCountData,
+
+	/*
+	trainPCM(neuronesTest, 4, fakeData, 10, 2, fakeTarget, 1, 5, .1, 0);
+	*/
+	__declspec(dllexport) void trainPCM(int *neuroneParCouche, int nbCouche, double* data, int colSizeData, int lineCountData,
 		double *target, int colSizeTarget, int epoch, double apprentissage, bool classifOrRegress) {
 
 		W = new double**[nbCouche + 1];//creer les couches + la première couche avec les data en "brut"

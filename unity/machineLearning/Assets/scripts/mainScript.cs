@@ -23,7 +23,9 @@ public class mainScript : MonoBehaviour
     [DllImport("machineLearning")]
     public static extern int FitLinearRegression(IntPtr model, double[] arrayInputs, int inputsSize,
         int inputSize, double[] outputs, int outputsSize);
-
+    [DllImport("machineLearning")]
+    public static extern void trainPCM(int[] neuroneParCouche, int nbCouche, double[] data, int colSizeData, int lineCountData,
+        double[] target, int colSizeTarget, int epoch, double apprentissage, bool classifOrRegress);
 
     // Start is called before the first frame update
     public Transform[] spheresToTrain;
@@ -227,12 +229,20 @@ public class mainScript : MonoBehaviour
             pos += 2;
         }
 
-        double[][] outputs = new double[tailleSphereToTrain][];
+        double[] outputs = new double[tailleSphereToTrain * 3];
+        int j = 0;
         for (int i = 0; i < tailleSphereToTrain; ++i)
         {
             Color c = spheresToTrain[i].GetComponent<Renderer>().material.color;
-            outputs[i] = new double[] { c.r, c.g, c.b };
+            outputs[j] = c.r;
+            j += 1;
+            outputs[j] = c.g;
+            j += 1;
+            outputs[j] = c.b;
+            j += 1;
         }
+
+        trainPCM(new int[] { 3 }, 1, arrayInputs, 2, tailleSphereToTrain, outputs, 3, 10, 0.01, true);
 
         /* PRINT
          * for (int i = 0; i < tailleSphereToTrain; ++i)
