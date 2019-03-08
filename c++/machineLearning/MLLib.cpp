@@ -36,17 +36,17 @@ extern "C" {
 		for (int j = 0; j < d[l]; ++j) {
 			sum += W[l][i][j] * delta[l][j];
 		}
-		return (1 - pow(X[l-1][i], 2))*sum;
+		return (1 - pow(X[l - 1][i], 2))*sum;
 	}
-	void updateW(int i, int j, int l, double ***W, double **X, double **delta, double biais) {
-		W[l][i][j] = W[l][i][j] - biais * X[l - 1][i] * delta[l][j];
+	double updateW(int l, int i, int j, double ***W, double **X, double **delta, double alpha) {
+		return W[l][i][j] - alpha * X[l - 1][i] * delta[l][j];
 	}
-	
+
 	double calculate_delta_j_LastCouche_classification(int l, int j, double **X, double target) {
 		return (1 - pow(X[l][j], 2))*(X[l][j] - target);
 	}
-	double calculate_delta_j_LastCouche_regression(int j, int l, double **X, double *Y) {
-		return X[l][j] - Y[j];
+	double calculate_delta_j_LastCouche_regression(int l, int j, double **X, double Y) {
+		return X[l][j] - Y;
 	}
 
 
@@ -257,92 +257,140 @@ extern "C" {
 	void usePCM(double* data, double *result, int nbData) {
 
 	}
+
 	double ***W;//les poids des neurones
 	double **X;//les valeurs des neurones
 	double **delta;//stock les delta
-	void trainPCM(int *neuroneParCouche, int nbCouche, double* data, int colSizeData, int lineCountData, double *target, int colSizeTarget, int epoch,double apprentissage) {
+	void resetNetwork() {
+		delete[] W;
+		delete[] X;
+		delete[] delta;
+
+	}
+	void trainPCM(int *neuroneParCouche, int nbCouche, double* data, int colSizeData, int lineCountData,
+		double *target, int colSizeTarget, int epoch, double apprentissage, bool classifOrRegress) {
 
 		W = new double**[nbCouche + 1];//creer les couches + la première couche avec les data en "brut"
 
 		W[0] = new double*[colSizeData + 1];//creer la première couche "manuellement" 		
+		for (int h = 0; h < epoch; h++) {
 
-		for (int i = 0; i < nbCouche; i++) {
-			W[i + 1] = new double*[neuroneParCouche[i] + 1];//creer les neurones dans chaque couche + le biais
-			for (int j = 0; j < neuroneParCouche[i]; j++) {
+			for (int i = 0; i < nbCouche; i++) {
+				W[i + 1] = new double*[neuroneParCouche[i] + 1];//creer les neurones dans chaque couche + le biais
+				for (int j = 0; j < neuroneParCouche[i]; j++) {
 
-				//init tout les poids entre -1 et 1
-				if (i == 0) {
-					W[i + 1][j] = new double[colSizeData + 1];
-					for (int k = 0; k < colSizeData + 1; k++) {
-						W[i + 1][j][k] = randomDouble(-1, 1);
+					//init tout les poids entre -1 et 1
+					if (i == 0) {
+						W[i + 1][j] = new double[colSizeData + 1];
+						for (int k = 0; k < colSizeData + 1; k++) {
+							W[i + 1][j][k] = randomDouble(-1, 1);
+						}
+
 					}
-
-				}
-				else {
-					W[i + 1][j] = new double[neuroneParCouche[i - 1] + 1];
-					for (int k = 0; k < neuroneParCouche[i - 1] + 1; k++) {
-						W[i + 1][j][k] = randomDouble(-1, 1);
+					else {
+						W[i + 1][j] = new double[neuroneParCouche[i - 1] + 1];
+						for (int k = 0; k < neuroneParCouche[i - 1] + 1; k++) {
+							W[i + 1][j][k] = randomDouble(-1, 1);
+						}
 					}
 				}
-			}
-
-		}
-		X = new double*[nbCouche + 1];//+1 rajoute la couche inital qui contient les données
-		X[0] = new double[colSizeData + 1];// il y as autant de neurone dans la première couche qu'il y as de données à analyser + le biais
-		X[0][colSizeData] = 1;//le biais est ici
-
-		delta = new double*[nbCouche];
-
-
-		//on met en place le tableaux de X et de delta
-		for (int j = 0; j < nbCouche; j++) {//on commence à 1 pour compter la couche qu'on a init avec les données de base
-
-			X[j + 1] = new double[neuroneParCouche[j] + 1];// neuroneparcouche +1 pour le biais et j+1 pour ignorer la première couche qu'on as fais amnuellement
-			X[j + 1][neuroneParCouche[j]] = 1; //on met le biais qui se trouve à la fin de la couche à 1
-
-			delta[j] = new double[neuroneParCouche[j]];
-
-		}
-
-		for (int i = 0; i < lineCountData; i++) {// pour chaque ligne de donnée pour entrainer
-		//on remplie les neurones de la première couche avec les données de la ligne
-			for (int j = 0; j < colSizeData; j++) {
-				X[0][j] = data[(i*lineCountData) + j];
 
 			}
-			//TODO determiner les X des couches suivante
-			for (int j = 0; j < nbCouche; j++) {
-				if (j == 0) {//si on est sur la première couche caché, la couche précedante n'est pas contenue dans neuroneParCouche mais dans colSizeData
+			X = new double*[nbCouche + 1];//+1 rajoute la couche inital qui contient les données
+			X[0] = new double[colSizeData + 1];// il y as autant de neurone dans la première couche qu'il y as de données à analyser + le biais
+			X[0][colSizeData] = 1;//le biais est ici
+
+			delta = new double*[nbCouche];
+
+
+			//on met en place le tableaux de X et de delta
+			for (int j = 0; j < nbCouche; j++) {//on commence à 1 pour compter la couche qu'on a init avec les données de base
+
+				X[j + 1] = new double[neuroneParCouche[j] + 1];// neuroneparcouche +1 pour le biais et j+1 pour ignorer la première couche qu'on as fais amnuellement
+				X[j + 1][neuroneParCouche[j]] = 1; //on met le biais qui se trouve à la fin de la couche à 1
+
+				delta[j] = new double[neuroneParCouche[j]];
+
+			}
+
+			for (int i = 0; i < lineCountData; i++) {// pour chaque ligne de donnée pour entrainer
+			//on remplie les neurones de la première couche avec les données de la ligne
+				for (int j = 0; j < colSizeData; j++) {
+					X[0][j] = data[(i*lineCountData) + j];
+
+				}
+				//TODO determiner les X des couches suivante
+				for (int j = 0; j < nbCouche; j++) {
+					if (j == 0) {//si on est sur la première couche caché, la couche précedante n'est pas contenue dans neuroneParCouche mais dans colSizeData
+						for (int k = 0; k < neuroneParCouche[j]; k++) {
+							if (classifOrRegress == 1) {
+								X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, colSizeData);
+							}
+							else {
+								X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, colSizeData);
+
+							}
+
+						}
+					}
+					else {
+						for (int k = 0; k < neuroneParCouche[j]; k++) {
+							if (classifOrRegress == 1) {
+								X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, neuroneParCouche[j - 1]);
+							}
+							else {
+								X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, neuroneParCouche[j - 1]);
+
+							}
+						}
+					}
+				}
+				//on determine les dernier delta
+				for (int j = 0; j < colSizeTarget; j++) {
+					if (classifOrRegress == 1) {
+
+						delta[nbCouche - 1][j] =
+							calculate_delta_j_LastCouche_classification(nbCouche,
+								neuroneParCouche[nbCouche - 1] - 1,
+								X,
+								target[(lineCountData*i) + j]);
+					}
+					else {
+						delta[nbCouche - 1][j] =
+							calculate_delta_j_LastCouche_regression(nbCouche,
+								neuroneParCouche[nbCouche - 1] - 1,
+								X,
+								target[(lineCountData*i) + j]);
+
+					}
+				}
+				//on determine les delta des couches cachée
+				for (int j = nbCouche - 2; j >= 0; j--) {
 					for (int k = 0; k < neuroneParCouche[j]; k++) {
-						X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, colSizeData);
+						delta[j][k] = calculate_delta_i_l(j + 1, k, X, W, neuroneParCouche, delta);
 
 					}
 				}
-				else {
-					for (int k = 0; k < neuroneParCouche[j]; k++) {
-						X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, neuroneParCouche[j - 1]);
+				for (int j = 1; j < nbCouche; j++) {
+					for (int k = 0; k < neuroneParCouche[j - 1]; k++) {
+						if (j == 1) {
+							for (int l = 0; l < colSizeData; l++) {
+								W[j][k][l] = updateW(j, k, l, W, X, delta, apprentissage);
 
+							}
+
+						}
+						else {
+							for (int l = 0; l < neuroneParCouche[j - 1]; l++) {
+								updateW(j, k, l, W, X, delta, apprentissage);
+							}
+
+						}
 					}
 				}
 			}
-			//on determine les dernier delta
-			for (int j = 0 ; j < colSizeTarget; j++) {
-
-				delta[nbCouche - 1][j] =
-					calculate_delta_j_LastCouche_classification(nbCouche,
-						neuroneParCouche[nbCouche - 1] - 1,
-						X,
-						target[(lineCountData*i) + j]);
-			}
-			//on determine les delta des couches cachée
-			for (int j = nbCouche - 1; j >= 0; j--) {
-				for (int k = 0; k < neuroneParCouche[j]; k++) {
-					delta[j][k] = calculate_delta_i_l(j+1, k, X, W, neuroneParCouche, delta);
-
-				}
-			}
+			printf("epoch %d OK\n", h + 1);
 		}
-		//TODO lancer la backpropagation
 
 		//les x[0] représente les resultat des neurone de la couche 0
 		//x[0][1] représente le resultat du neurone 1 de la couche 0
@@ -406,10 +454,11 @@ extern "C" {
 
 		//char* temp = new char[50];
 		//scanf_s("%s", &temp);
-		int* neuronesTest = new int[3];
+		int* neuronesTest = new int[4];
 		neuronesTest[0] = 2;
 		neuronesTest[1] = 5;
 		neuronesTest[2] = 5;
+		neuronesTest[3] = 1;
 		double *fakeData = new double[20];
 		fakeData[0] = .2;
 		fakeData[1] = 1.2;
@@ -444,8 +493,8 @@ extern "C" {
 		fakeTarget[7] = 0.4;
 		fakeTarget[8] = 9.2;
 		fakeTarget[9] = 7.6;
-		trainPCM(neuronesTest, 3, fakeData, 10, 2, fakeTarget, 10, 10,.01);
-		//printf("compilation OK. appuyez sur ENTREE pour fermer...\n");
-		//getchar();
+		trainPCM(neuronesTest, 4, fakeData, 10, 2, fakeTarget, 1, 5, .1, 0);
+		printf("compilation OK. appuyez sur ENTREE pour fermer...\n");
+		getchar();
 	}
 }
