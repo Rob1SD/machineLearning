@@ -24,10 +24,10 @@ public class mainScript : MonoBehaviour
     public static extern int FitLinearRegression(IntPtr model, double[] arrayInputs, int inputsSize,
         int inputSize, double[] outputs, int outputsSize);
     [DllImport("machineLearning")]
-    public static extern void trainPCM(int[] neuroneParCouche, int nbCouche, double[] data, int colSizeData, int lineCountData,
+    public static extern IntPtr trainPCM(int[] neuroneParCouche, int nbCouche, double[] data, int colSizeData, int lineCountData,
         double[] target, int colSizeTarget, int epoch, double apprentissage, bool classifOrRegress);
     [DllImport("machineLearning")]
-    public static extern double[] usePCM(double[] data, int colSize);
+    public static extern double[] usePCM(double[] data, int colSize, IntPtr model);
 
     // Start is called before the first frame update
     public Transform[] spheresToTrain;
