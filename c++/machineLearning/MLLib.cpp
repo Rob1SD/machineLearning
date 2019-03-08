@@ -24,6 +24,13 @@ extern "C" {
 		}
 		return tanh(result);
 	}
+	double calulateX_j_l_regression(int l, int j, double **X, double ***W, int nbNeuroneCouchePrecedante) {
+		double result = 0;
+		for (int i = 0; i <= nbNeuroneCouchePrecedante; ++i) {
+			result += W[l][j][i] * X[l - 1][i];
+		}
+		return result;
+	}
 	double calculate_delta_i_l(int l, int i, double **X, double ***W, int *d, double **delta) {
 		double sum = 0;
 		for (int j = 0; j < d[l]; ++j) {
