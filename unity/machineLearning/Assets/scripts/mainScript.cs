@@ -246,49 +246,17 @@ public class mainScript : MonoBehaviour
 
         int[] neuronesc = new int[] { 4, 3 };
 
-        string s = "neurones couches : ";
 
-        foreach(var n in neuronesc)
+
+        //Debug.Log(array[0] + ", " + array[1] + ", " + array[2]);
+
+        foreach(var sphere in spheresToMove)
         {
-            s += n;
-            s += ", ";
-        }
-
-        s += " nombre couche : ";
-        s += 2;
-        s += ", inputs : ";
-
-        foreach (var n in arrayInputs)
-        {
-            s += n;
-            s += ", ";
-        }
-
-        s += "colsizedata : ";
-        s += 2;
-        s += ", linesizedata : ";
-        s += tailleSphereToTrain;
-        s += ", outputs : ";
-
-        foreach (var n in outputs)
-        {
-            s += n;
-            s += ", ";
-        }
-
-        Debug.Log(s);
+            double[] array = usePCM(new double[] { sphere.position.x, sphere.position.z }, 2, ptr);
 
 
-        trainPCM(neuronesc, 2, arrayInputs, 2, tailleSphereToTrain, outputs, 3, 10, 0.01, true);
-
-        var array = usePCM(new double[] { 9, 7 }, 2);
-        Debug.Log(array[0] + ", " + array[1] + ", " + array[2]);
-
-        /*foreach(var sphere in spheresToMove)
-        {
-            double[] array = usePCM(new double[] { sphere.position.x, sphere.position.z }, 2);
             Debug.Log(sphere.position.x + "x" + sphere.position.z + "y, rgb :" + array[0] + ", " + array[1] + ", " + array[2]);
-        }*/
+        }
     }
 
     //essayer de bouger les spheres une par une mais c'est moche
