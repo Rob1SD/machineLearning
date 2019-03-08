@@ -395,14 +395,14 @@ extern "C" {
 
 						myStruct->delta[myStruct->nbCouche - 1][j] =
 							calculate_delta_j_LastCouche_classification(myStruct->nbCouche,
-								myStruct->neuroneParCouche[myStruct->nbCouche - 1] - 1,
+								j ,
 								myStruct->X,
 								target[(lineCountData*i) + j]);
 					}
 					else {
 						myStruct->delta[myStruct->nbCouche - 1][j] =
 							calculate_delta_j_LastCouche_regression(myStruct->nbCouche,
-								myStruct->neuroneParCouche[myStruct->nbCouche - 1] - 1,
+								j,
 								myStruct->X,
 								target[(lineCountData*i) + j]);
 
@@ -411,7 +411,12 @@ extern "C" {
 				//on determine les delta des couches cachée
 				for (int j = myStruct->nbCouche - 2; j >= 0; j--) {
 					for (int k = 0; k < myStruct->neuroneParCouche[j]; k++) {
-						myStruct->delta[j][k] = calculate_delta_i_l(j + 1, k, myStruct->X, myStruct->W, myStruct->neuroneParCouche, myStruct->delta);
+						myStruct->delta[j][k] = calculate_delta_i_l(j + 1,
+							k,
+							myStruct->X,
+							myStruct->W,
+							myStruct->neuroneParCouche,
+							myStruct->delta);
 
 					}
 				}
@@ -426,7 +431,7 @@ extern "C" {
 						}
 						else {
 							for (int l = 0; l < myStruct->neuroneParCouche[j - 1]; l++) {
-								updateW(j, k, l, myStruct->W, myStruct->X, myStruct->delta, apprentissage);
+								myStruct->W[j][k][l] = updateW(j, k, l, myStruct->W, myStruct->X, myStruct->delta, apprentissage);
 							}
 
 						}
