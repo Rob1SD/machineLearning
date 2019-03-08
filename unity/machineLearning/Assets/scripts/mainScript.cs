@@ -28,6 +28,7 @@ public class mainScript : MonoBehaviour
     // Start is called before the first frame update
     public Transform[] spheresToTrain;
     public Transform[] spheresToMove;
+    private List<Color> listColors;
     private IntPtr model;
 
 
@@ -46,7 +47,12 @@ public class mainScript : MonoBehaviour
                 break;
             case "SOLUTION":
                 if (name.Split('_')[1].ToUpper() == "XOR") ActionForXOR();
-                else if (name.Split('_')[1].ToUpper() == "CROSS") ActionForCROSS();
+                break;
+            case "PMC":
+                if(name.Split('_')[1].ToUpper() == "CLASSIFICATION")
+                {
+                    ActionForPMCClassification();
+                }
                 break;
         }
     }
@@ -113,37 +119,6 @@ public class mainScript : MonoBehaviour
         }
     }
 
-    void ActionForCROSS()
-    {
-        model = CreateModel(3);
-
-        int tailleSphereToTrain = spheresToTrain.Length;
-        double[] arrayInputs = new double[tailleSphereToTrain * 2];
-        var pos = 0;
-        for (int i = 0; i < tailleSphereToTrain; ++i)
-        {
-            arrayInputs[pos] = Math.Pow(spheresToMove[i].position.x, 2);
-            arrayInputs[pos + 1] = Math.Pow(spheresToMove[i].position.z, 2);
-            pos += 2;
-        }
-        double[] outputs = new double[tailleSphereToTrain];
-        for (int i = 0; i < tailleSphereToTrain; ++i)
-        {
-            outputs[i] = spheresToTrain[i].position.y > 0 ? 1 : -1;
-        }
-
-        int result = FitLinearClassification(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain, 0.01, 10000);
-        int tailleSphereToMove = spheresToMove.Length;
-        for (int i = 0; i < tailleSphereToMove; ++i)
-        {
-            // spheresToMove[i]
-            double[] cord = new double[2] { Math.Pow(spheresToMove[i].position.x, 2), Math.Pow(spheresToMove[i].position.z, 2) };
-            double newcord = LinearClassification(model, cord, 2);
-            //
-            spheresToMove[i].position = new Vector3(spheresToMove[i].position.x, (float)newcord, spheresToMove[i].position.z);
-        }
-    }
-
     void ActionForRegression()
     {
         model = CreateModel(3);
@@ -174,6 +149,97 @@ public class mainScript : MonoBehaviour
             //
             spheresToMove[i].position = new Vector3(spheresToMove[i].position.x, (float)newcord, spheresToMove[i].position.z);
         }
+    }
+
+
+
+    void ActionForPMCClassification()
+    {
+        listColors = new List<Color>();
+
+        foreach(var sphere in spheresToTrain)
+        {
+            if (!listColors.Contains(sphere.GetComponent<Renderer>().material.color))
+            {
+                listColors.Add(sphere.GetComponent<Renderer>().material.color);
+            }
+        }
+
+        if (listColors.Count == 2)
+        {
+            PMCForDuoClasses(listColors);
+        }
+        else if (listColors.Count == 3)
+        {
+            PMCForTrioClasses(listColors);
+        }
+    }
+
+    void PMCForDuoClasses(List<Color> colors)
+    {
+        Dictionary<Color, int> dicoIntForColor = new Dictionary<Color, int>();
+        Dictionary<int, Color> dicoColorForInt = new Dictionary<int, Color>();
+
+        dicoIntForColor[colors[0]] = 1;
+        dicoIntForColor[colors[1]] = -1;
+        dicoColorForInt[1] = colors[0];
+        dicoColorForInt[-1] = colors[1];
+
+
+        model = CreateModel(3);
+
+        int tailleSphereToTrain = spheresToTrain.Length;
+        double[] arrayInputs = new double[tailleSphereToTrain * 2];
+        var pos = 0;
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            arrayInputs[pos] = spheresToTrain[i].position.x;
+            arrayInputs[pos + 1] = spheresToTrain[i].position.z;
+            pos += 2;
+        }
+        double[] outputs = new double[tailleSphereToTrain];
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            outputs[i] = dicoIntForColor[spheresToTrain[i].GetComponent<Renderer>().material.color];
+        }
+
+        int result = FitLinearClassification(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain, 0.01, 10000);
+        int tailleSphereToMove = spheresToMove.Length;
+        for (int i = 0; i < tailleSphereToMove; ++i)
+        {
+            double[] cord = new double[2] { spheresToMove[i].position.x, spheresToMove[i].position.z };
+            double newColor = LinearClassification(model, cord, 2);
+            spheresToMove[i].GetComponent<Renderer>().material.color = dicoColorForInt[(int)newColor];
+        }
+    }
+
+    void PMCForTrioClasses(List<Color> colors)
+    {
+        int tailleSphereToTrain = spheresToTrain.Length;
+
+        double[] arrayInputs = new double[tailleSphereToTrain * 2];
+        var pos = 0;
+
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            arrayInputs[pos] = spheresToTrain[i].position.x;
+            arrayInputs[pos + 1] = spheresToTrain[i].position.z;
+            pos += 2;
+        }
+
+        double[][] outputs = new double[tailleSphereToTrain][];
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            Color c = spheresToTrain[i].GetComponent<Renderer>().material.color;
+            outputs[i] = new double[] { c.r, c.g, c.b };
+        }
+
+        /* PRINT
+         * for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            Debug.Log(outputs[i][0].ToString() + ", " + outputs[i][1].ToString() + ", " + outputs[i][2].ToString());
+        }
+        */
     }
 
     //essayer de bouger les spheres une par une mais c'est moche
