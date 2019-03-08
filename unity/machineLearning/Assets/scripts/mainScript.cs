@@ -26,6 +26,8 @@ public class mainScript : MonoBehaviour
     [DllImport("machineLearning")]
     public static extern void trainPCM(int[] neuroneParCouche, int nbCouche, double[] data, int colSizeData, int lineCountData,
         double[] target, int colSizeTarget, int epoch, double apprentissage, bool classifOrRegress);
+    [DllImport("machineLearning")]
+    public static extern double[] usePCM(double[] data, int colSize);
 
     // Start is called before the first frame update
     public Transform[] spheresToTrain;
@@ -242,14 +244,51 @@ public class mainScript : MonoBehaviour
             j += 1;
         }
 
-        trainPCM(new int[] { 3 }, 1, arrayInputs, 2, tailleSphereToTrain, outputs, 3, 10, 0.01, true);
+        int[] neuronesc = new int[] { 4, 3 };
 
-        /* PRINT
-         * for (int i = 0; i < tailleSphereToTrain; ++i)
+        string s = "neurones couches : ";
+
+        foreach(var n in neuronesc)
         {
-            Debug.Log(outputs[i][0].ToString() + ", " + outputs[i][1].ToString() + ", " + outputs[i][2].ToString());
+            s += n;
+            s += ", ";
         }
-        */
+
+        s += " nombre couche : ";
+        s += 2;
+        s += ", inputs : ";
+
+        foreach (var n in arrayInputs)
+        {
+            s += n;
+            s += ", ";
+        }
+
+        s += "colsizedata : ";
+        s += 2;
+        s += ", linesizedata : ";
+        s += tailleSphereToTrain;
+        s += ", outputs : ";
+
+        foreach (var n in outputs)
+        {
+            s += n;
+            s += ", ";
+        }
+
+        Debug.Log(s);
+
+
+        trainPCM(neuronesc, 2, arrayInputs, 2, tailleSphereToTrain, outputs, 3, 10, 0.01, true);
+
+        var array = usePCM(new double[] { 9, 7 }, 2);
+        Debug.Log(array[0] + ", " + array[1] + ", " + array[2]);
+
+        /*foreach(var sphere in spheresToMove)
+        {
+            double[] array = usePCM(new double[] { sphere.position.x, sphere.position.z }, 2);
+            Debug.Log(sphere.position.x + "x" + sphere.position.z + "y, rgb :" + array[0] + ", " + array[1] + ", " + array[2]);
+        }*/
     }
 
     //essayer de bouger les spheres une par une mais c'est moche
