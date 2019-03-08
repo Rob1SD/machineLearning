@@ -253,132 +253,137 @@ extern "C" {
 
 		return 1;
 	}
-	double ***W;//les poids des neurones
-	double **X;//les valeurs des neurones
-	double **delta;//stock les delta
-	int* neuroneParCouche;
-	int nbCouche;
-	bool classifOrRegress;
-	__declspec(dllexport) double*  usePCM(double* data, int colSize) {
+	struct model {
+
+		double ***W;//les poids des neurones
+		double **X;//les valeurs des neurones
+		double **delta;//stock les delta
+		int* neuroneParCouche;
+		int nbCouche;
+		bool classifOrRegress;
+	};
+	__declspec(dllexport) double*  usePCM(double* data, int colSize, model monModel) {
 
 		for (int j = 0; j < colSize; j++) {
-			X[0][j] = data[j];
+			monModel.X[0][j] = data[j];
 
 		}
-		for (int j = 0; j < nbCouche; j++) {
-		
+		for (int j = 0; j < monModel.nbCouche; j++) {
+
 			if (j == 0) {//si on est sur la première couche caché, la couche précedante n'est pas contenue dans neuroneParCouche mais dans colSizeData
-				for (int k = 0; k < neuroneParCouche[j]; k++) {
-					if (classifOrRegress == 1) {
-						X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, colSize);
+				for (int k = 0; k < monModel.neuroneParCouche[j]; k++) {
+					if (monModel.classifOrRegress == 1) {
+						monModel.X[j + 1][k] = calulateX_j_l(j + 1, k, monModel.X, monModel.W, colSize);
 					}
 					else {
-						X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, colSize);
+						monModel.X[j + 1][k] = calulateX_j_l_regression(j + 1, k, monModel.X, monModel.W, colSize);
 
 					}
 
 				}
 			}
 			else {
-				for (int k = 0; k < neuroneParCouche[j]; k++) {
-					if (classifOrRegress == 1) {
-						X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, neuroneParCouche[j - 1]);
+				for (int k = 0; k < monModel.neuroneParCouche[j]; k++) {
+					if (monModel.classifOrRegress == 1) {
+						monModel.X[j + 1][k] = calulateX_j_l(j + 1, k, monModel.X, monModel.W, monModel.neuroneParCouche[j - 1]);
 					}
 					else {
-						X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, neuroneParCouche[j - 1]);
+						monModel.X[j + 1][k] = calulateX_j_l_regression(j + 1, k, monModel.X, monModel.W, monModel.neuroneParCouche[j - 1]);
 
 					}
 				}
 			}
 		}
-		double* result = new double[neuroneParCouche[nbCouche - 1]];
-		for (int i = 0; i < neuroneParCouche[nbCouche - 1]; i++) {
-			result[i] = X[nbCouche ][i];
+		double* result = new double[monModel.neuroneParCouche[monModel.nbCouche - 1]];
+		for (int i = 0; i < monModel.neuroneParCouche[monModel.nbCouche - 1]; i++) {
+			result[i] = monModel.X[monModel.nbCouche][i];
 		}
 		return result;
 	}
 
-	void resetNetwork() {
-		delete[] W;
-		delete[] X;
-		delete[] delta;
-		delete neuroneParCouche;
-		nbCouche = 0;
-	}
-	__declspec(dllexport) void trainPCM(int *_neuroneParCouche, int _nbCouche, double* data, int colSizeData, int lineCountData,
+	//void resetNetwork() {
+	//	delete[] W;
+	//	delete[] X;
+	//	delete[] delta;
+	//	delete neuroneParCouche;
+	//	nbCouche = 0;
+	//}
+	__declspec(dllexport) model trainPCM(int *_neuroneParCouche, int _nbCouche, double* data, int colSizeData, int lineCountData,
 		double *target, int colSizeTarget, int epoch, double apprentissage, bool _classifOrRegress) {
-		neuroneParCouche = _neuroneParCouche;
-		nbCouche = _nbCouche;
-		classifOrRegress = _classifOrRegress;
-		W = new double**[nbCouche + 1];//creer les couches + la première couche avec les data en "brut"
+		model myStruct ;
+		myStruct.neuroneParCouche = _neuroneParCouche;
+		myStruct.nbCouche = _nbCouche;
+		myStruct.classifOrRegress = _classifOrRegress;
+		myStruct.W = new double**[myStruct.nbCouche + 1];//creer les couches + la première couche avec les data en "brut"
+		int cptPoids = 0;
 
-		W[0] = new double*[colSizeData + 1];//creer la première couche "manuellement" 		
+		myStruct.W[0] = new double*[colSizeData + 1];//creer la première couche "manuellement" 		
 		for (int h = 0; h < epoch; h++) {
 
-			for (int i = 0; i < nbCouche; i++) {
-				W[i + 1] = new double*[neuroneParCouche[i] + 1];//creer les neurones dans chaque couche + le biais
-				for (int j = 0; j < neuroneParCouche[i]; j++) {
+			for (int i = 0; i < myStruct.nbCouche; i++) {
+				myStruct.W[i + 1] = new double*[myStruct.neuroneParCouche[i] + 1];//creer les neurones dans chaque couche + le biais
+				for (int j = 0; j < myStruct.neuroneParCouche[i]; j++) {
 
 					//init tout les poids entre -1 et 1
 					if (i == 0) {
-						W[i + 1][j] = new double[colSizeData + 1];
+						myStruct.W[i + 1][j] = new double[colSizeData + 1];
 						for (int k = 0; k < colSizeData + 1; k++) {
-							W[i + 1][j][k] = randomDouble(-1, 1);
+							myStruct.W[i + 1][j][k] = randomDouble(-1, 1);
 						}
 
 					}
 					else {
-						W[i + 1][j] = new double[neuroneParCouche[i - 1] + 1];
-						for (int k = 0; k < neuroneParCouche[i - 1] + 1; k++) {
-							W[i + 1][j][k] = randomDouble(-1, 1);
+						myStruct.W[i + 1][j] = new double[myStruct.neuroneParCouche[i - 1] + 1];
+						for (int k = 0; k < myStruct.neuroneParCouche[i - 1] + 1; k++) {
+							myStruct.W[i + 1][j][k] = randomDouble(-1, 1);
 						}
 					}
 				}
 
 			}
-			X = new double*[nbCouche + 1];//+1 rajoute la couche inital qui contient les données
-			X[0] = new double[colSizeData + 1];// il y as autant de neurone dans la première couche qu'il y as de données à analyser + le biais
-			X[0][colSizeData] = 1;//le biais est ici
+			myStruct.X = new double*[myStruct.nbCouche + 1];//+1 rajoute la couche inital qui contient les données
+			myStruct.X[0] = new double[colSizeData + 1];// il y as autant de neurone dans la première couche qu'il y as de données à analyser + le biais
+			myStruct.X[0][colSizeData] = 1;//le biais est ici
 
-			delta = new double*[nbCouche];
+			myStruct.delta = new double*[myStruct.nbCouche];
 
 
 			//on met en place le tableaux de X et de delta
-			for (int j = 0; j < nbCouche; j++) {//on commence à 1 pour compter la couche qu'on a init avec les données de base
+			for (int j = 0; j < myStruct.nbCouche; j++) {//on commence à 1 pour compter la couche qu'on a init avec les données de base
 
-				X[j + 1] = new double[neuroneParCouche[j] + 1];// neuroneparcouche +1 pour le biais et j+1 pour ignorer la première couche qu'on as fais amnuellement
-				X[j + 1][neuroneParCouche[j]] = 1; //on met le biais qui se trouve à la fin de la couche à 1
+				myStruct.X[j + 1] = new double[myStruct.neuroneParCouche[j] + 1];// neuroneparcouche +1 pour le biais et j+1 pour ignorer la première couche qu'on as fais amnuellement
+				myStruct.X[j + 1][myStruct.neuroneParCouche[j]] = 1; //on met le biais qui se trouve à la fin de la couche à 1
 
-				delta[j] = new double[neuroneParCouche[j]];
+				myStruct.delta[j] = new double[myStruct.neuroneParCouche[j]];
 
 			}
 
 			for (int i = 0; i < lineCountData; i++) {// pour chaque ligne de donnée pour entrainer
 			//on remplie les neurones de la première couche avec les données de la ligne
 				for (int j = 0; j < colSizeData; j++) {
-					X[0][j] = data[(i*lineCountData) + j];
+					myStruct.X[0][j] = data[(i*lineCountData) + j];
 
 				}
-				for (int j = 0; j < nbCouche; j++) {
+				for (int j = 0; j < myStruct.nbCouche; j++) {
 					if (j == 0) {//si on est sur la première couche caché, la couche précedante n'est pas contenue dans neuroneParCouche mais dans colSizeData
-						for (int k = 0; k < neuroneParCouche[j]; k++) {
-							if (classifOrRegress == 1) {
-								X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, colSizeData);
+						for (int k = 0; k < myStruct.neuroneParCouche[j]; k++) {
+							if (myStruct.classifOrRegress == 1) {
+								myStruct.X[j + 1][k] = calulateX_j_l(j + 1, k, myStruct.X, myStruct.W, colSizeData);
 							}
 							else {
-								X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, colSizeData);
+								myStruct.X[j + 1][k] = calulateX_j_l_regression(j + 1, k, myStruct.X, myStruct.W, colSizeData);
 
 							}
 
 						}
 					}
 					else {
-						for (int k = 0; k < neuroneParCouche[j]; k++) {
-							if (classifOrRegress == 1) {
-								X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, neuroneParCouche[j - 1]);
+						for (int k = 0; k < myStruct.neuroneParCouche[j]; k++) {
+							if (myStruct.classifOrRegress == 1) {
+								myStruct.X[j + 1][k] = calulateX_j_l(j + 1, k, myStruct.X, myStruct.W, myStruct.neuroneParCouche[j - 1]);
 							}
 							else {
-								X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, neuroneParCouche[j - 1]);
+								myStruct.X[j + 1][k] = calulateX_j_l_regression(j + 1, k, myStruct.X, myStruct.W, myStruct.neuroneParCouche[j - 1]);
 
 							}
 						}
@@ -386,42 +391,42 @@ extern "C" {
 				}
 				//on determine les dernier delta
 				for (int j = 0; j < colSizeTarget; j++) {
-					if (classifOrRegress == 1) {
+					if (myStruct.classifOrRegress == 1) {
 
-						delta[nbCouche - 1][j] =
-							calculate_delta_j_LastCouche_classification(nbCouche,
-								neuroneParCouche[nbCouche - 1] - 1,
-								X,
+						myStruct.delta[myStruct.nbCouche - 1][j] =
+							calculate_delta_j_LastCouche_classification(myStruct.nbCouche,
+								myStruct.neuroneParCouche[myStruct.nbCouche - 1] - 1,
+								myStruct.X,
 								target[(lineCountData*i) + j]);
 					}
 					else {
-						delta[nbCouche - 1][j] =
-							calculate_delta_j_LastCouche_regression(nbCouche,
-								neuroneParCouche[nbCouche - 1] - 1,
-								X,
+						myStruct.delta[myStruct.nbCouche - 1][j] =
+							calculate_delta_j_LastCouche_regression(myStruct.nbCouche,
+								myStruct.neuroneParCouche[myStruct.nbCouche - 1] - 1,
+								myStruct.X,
 								target[(lineCountData*i) + j]);
 
 					}
 				}
 				//on determine les delta des couches cachée
-				for (int j = nbCouche - 2; j >= 0; j--) {
-					for (int k = 0; k < neuroneParCouche[j]; k++) {
-						delta[j][k] = calculate_delta_i_l(j + 1, k, X, W, neuroneParCouche, delta);
+				for (int j = myStruct.nbCouche - 2; j >= 0; j--) {
+					for (int k = 0; k < myStruct.neuroneParCouche[j]; k++) {
+						myStruct.delta[j][k] = calculate_delta_i_l(j + 1, k, myStruct.X, myStruct.W, myStruct.neuroneParCouche, myStruct.delta);
 
 					}
 				}
-				for (int j = 1; j < nbCouche; j++) {
-					for (int k = 0; k < neuroneParCouche[j - 1]; k++) {
+				for (int j = 1; j < myStruct.nbCouche; j++) {
+					for (int k = 0; k < myStruct.neuroneParCouche[j - 1]; k++) {
 						if (j == 1) {
 							for (int l = 0; l < colSizeData; l++) {
-								W[j][k][l] = updateW(j, k, l, W, X, delta, apprentissage);
+								myStruct.W[j][k][l] = updateW(j, k, l, myStruct.W, myStruct.X, myStruct.delta, apprentissage);
 
 							}
 
 						}
 						else {
-							for (int l = 0; l < neuroneParCouche[j - 1]; l++) {
-								updateW(j, k, l, W, X, delta, apprentissage);
+							for (int l = 0; l < myStruct.neuroneParCouche[j - 1]; l++) {
+								updateW(j, k, l, myStruct.W, myStruct.X, myStruct.delta, apprentissage);
 							}
 
 						}
@@ -430,12 +435,12 @@ extern "C" {
 			}
 			printf("epoch %d OK\n", h + 1);
 		}
-
-		//les x[0] représente les resultat des neurone de la couche 0
-		//x[0][1] représente le resultat du neurone 1 de la couche 0
-		//pour determiner x[1][2] par exemple, fait la tanh de la somme ponderé de tout les x[0], multiplié par les poids de x[1][2]
-		//quand on as ateint le fond du reseau, sur les x[3] si on as 4 couche, on fais la backpropagation
-		//les y[n] sont les target attendu. il y as autant de n que de colones attendu en réponse, aka le nombre de neurone de sortie
+		return myStruct;
+			//les x[0] représente les resultat des neurone de la couche 0
+			//x[0][1] représente le resultat du neurone 1 de la couche 0
+			//pour determiner x[1][2] par exemple, fait la tanh de la somme ponderé de tout les x[0], multiplié par les poids de x[1][2]
+			//quand on as ateint le fond du reseau, sur les x[3] si on as 4 couche, on fais la backpropagation
+			//les y[n] sont les target attendu. il y as autant de n que de colones attendu en réponse, aka le nombre de neurone de sortie
 
 	}
 	__declspec(dllexport) int FitLinearClassification(double *model, double *arrayInputs, int inputsSize,
@@ -549,11 +554,11 @@ extern "C" {
 		faketargetbouboule[8] = 0;
 
 		//trainPCM(neuronesTest, 4, fakeData, 2, 2, fakeTarget, 1, 5, .1, 0);
-		trainPCM(neuronebouboule,2, fakedatabouboule, 2, 3, faketargetbouboule, 3, 10, .01, 1);
+		model resultModel=trainPCM(neuronebouboule, 2, fakedatabouboule, 2, 3, faketargetbouboule, 3, 10, .01, 1);
 		double *test = new double[2];
 		test[0] = 9;
 		test[1] = 7;
-		double* result = usePCM(test, 2);
+		double* result = usePCM(test, 2, resultModel);
 		printf("compilation OK. appuyez sur ENTREE pour fermer...\n");
 		getchar();
 	}
