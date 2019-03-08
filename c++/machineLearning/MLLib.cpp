@@ -259,7 +259,7 @@ extern "C" {
 	int* neuroneParCouche;
 	int nbCouche;
 	bool classifOrRegress;
-	double*  usePCM(double* data, int colSize) {
+	__declspec(dllexport) double*  usePCM(double* data, int colSize) {
 
 		for (int j = 0; j < colSize; j++) {
 			X[0][j] = data[j];
@@ -305,7 +305,7 @@ extern "C" {
 		delete neuroneParCouche;
 		nbCouche = 0;
 	}
-	void trainPCM(int *_neuroneParCouche, int _nbCouche, double* data, int colSizeData, int lineCountData,
+	__declspec(dllexport) void trainPCM(int *_neuroneParCouche, int _nbCouche, double* data, int colSizeData, int lineCountData,
 		double *target, int colSizeTarget, int epoch, double apprentissage, bool _classifOrRegress) {
 		neuroneParCouche = _neuroneParCouche;
 		nbCouche = _nbCouche;
