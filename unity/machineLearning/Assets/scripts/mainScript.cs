@@ -44,6 +44,10 @@ public class mainScript : MonoBehaviour
             case "REGRESSION":
                 ActionForRegression();
                 break;
+            case "SOLUTION":
+                if (name.Split('_')[1].ToUpper() == "XOR") ActionForXOR();
+                else if (name.Split('_')[1].ToUpper() == "CROSS") ActionForCROSS();
+                break;
         }
     }
 
@@ -72,6 +76,68 @@ public class mainScript : MonoBehaviour
         {
             // spheresToMove[i]
             double[] cord = new double[2] { spheresToMove[i].position.x, spheresToMove[i].position.z };
+            double newcord = LinearClassification(model, cord, 2);
+            //
+            spheresToMove[i].position = new Vector3(spheresToMove[i].position.x, (float)newcord, spheresToMove[i].position.z);
+        }
+    }
+
+    void ActionForXOR()
+    {
+        model = CreateModel(3);
+
+        int tailleSphereToTrain = spheresToTrain.Length;
+        double[] arrayInputs = new double[tailleSphereToTrain * 2];
+        var pos = 0;
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            arrayInputs[pos] = spheresToMove[i].position.x * spheresToMove[i].position.z;
+            arrayInputs[pos + 1] = spheresToMove[i].position.z;
+            pos += 2;
+        }
+        double[] outputs = new double[tailleSphereToTrain];
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            outputs[i] = spheresToTrain[i].position.y > 0 ? 1 : -1;
+        }
+
+        int result = FitLinearClassification(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain, 0.01, 10000);
+        int tailleSphereToMove = spheresToMove.Length;
+        for (int i = 0; i < tailleSphereToMove; ++i)
+        {
+            // spheresToMove[i]
+            double[] cord = new double[2] { spheresToMove[i].position.x * spheresToMove[i].position.z, spheresToMove[i].position.z };
+            double newcord = LinearClassification(model, cord, 2);
+            //
+            spheresToMove[i].position = new Vector3(spheresToMove[i].position.x, (float)newcord, spheresToMove[i].position.z);
+        }
+    }
+
+    void ActionForCROSS()
+    {
+        model = CreateModel(3);
+
+        int tailleSphereToTrain = spheresToTrain.Length;
+        double[] arrayInputs = new double[tailleSphereToTrain * 2];
+        var pos = 0;
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            arrayInputs[pos] = Math.Pow(spheresToMove[i].position.x, 2);
+            arrayInputs[pos + 1] = Math.Pow(spheresToMove[i].position.z, 2);
+            pos += 2;
+        }
+        double[] outputs = new double[tailleSphereToTrain];
+        for (int i = 0; i < tailleSphereToTrain; ++i)
+        {
+            outputs[i] = spheresToTrain[i].position.y > 0 ? 1 : -1;
+        }
+
+        int result = FitLinearClassification(model, arrayInputs, tailleSphereToTrain, 2, outputs, tailleSphereToTrain, 0.01, 10000);
+        int tailleSphereToMove = spheresToMove.Length;
+        for (int i = 0; i < tailleSphereToMove; ++i)
+        {
+            // spheresToMove[i]
+            double[] cord = new double[2] { Math.Pow(spheresToMove[i].position.x, 2), Math.Pow(spheresToMove[i].position.z, 2) };
             double newcord = LinearClassification(model, cord, 2);
             //
             spheresToMove[i].position = new Vector3(spheresToMove[i].position.x, (float)newcord, spheresToMove[i].position.z);
