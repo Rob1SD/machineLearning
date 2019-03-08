@@ -17,31 +17,32 @@ extern "C" {
 		double scale = rand() / (double)RAND_MAX; /* [0, 1.0] */
 		return min + scale * (max - min);      /* [min, max] */
 	}
-	double calulateX_j_l(int j, int l, double **X, double ***W, int *d) {
-		double result = 0;
-		for (int i = 0; i <= d[l-1]; ++i) {
-			result += W[l][i][j]*X[l-1][i] ;
-		}
-		return tanh(result);
+	double calulateX_j_l(int j, int l, double **X, double ***W, int nbNeuroneCouchePrecedante) {
+		//double result = 0;
+		//for (int i = 0; i <= nbNeuroneCouchePrecedante; ++i) {
+		//	result += W[l][i][j]*X[l-1][i] ;//couche l neurone j poids i (enlalal robin y c'est planté)
+		//}
+		//return tanh(result);
+		return 1;
 
 	}
 	double calculate_delta_j_LastCouche_classification(int j, int l, double **X, double *Y) {
-		return (1 - pow(X[l][j], 2))*(X[l][j]-Y[j]);
+		return (1 - pow(X[l][j], 2))*(X[l][j] - Y[j]);
 	}
 	double calculate_delta_i_l(int i, int l, double **X, double ***W, int *d, double *Y, double **delta) {
 		double sum = 0;
 		for (int j = 1; j <= d[l]; ++j) {
 			sum += W[l][i][j] * delta[l][j];
 		}
-		return (1 - pow(X[l-1][i], 2))*sum;
+		return (1 - pow(X[l - 1][i], 2))*sum;
 	}
 	void updateW(int i, int j, int l, double ***W, double **X, double **delta, double biais) {
 		W[l][i][j] = W[l][i][j] - biais * X[l - 1][i] * delta[l][j];
 	}
 	double calculate_delta_j_LastCouche_regression(int j, int l, double **X, double *Y) {
-		return X[l][j]-Y[j];
+		return X[l][j] - Y[j];
 	}
-	
+
 
 	__declspec(dllexport) double *CreateModel(int inputdimension) {
 		double* array = new double[inputdimension];
@@ -237,12 +238,12 @@ extern "C" {
 		}
 
 		model[(LineRetour * colRetour) - 1] = tmp;
-/*
-		double temp = model[(LineRetour * colRetour) - 1];
+		/*
+				double temp = model[(LineRetour * colRetour) - 1];
 
-		model[(LineRetour * colRetour) - 1] = model[0];
+				model[(LineRetour * colRetour) - 1] = model[0];
 
-		model[0] = temp;*/
+				model[0] = temp;*/
 
 		return 1;
 	}
@@ -250,15 +251,68 @@ extern "C" {
 	void usePCM(double* data, double *result, int nbData) {
 
 	}
-	double ***W;
-	void trainPCM(int *neuroneParCouche, int nbCouche, double* data,int colSizeData,double *target,int colSizeDataTarget) {
-		W = new double**[nbCouche];//creer les couches
+	double ***W;//les poids des neurones
+	double **X;//les valeurs des neurones
+	void trainPCM(int *neuroneParCouche, int nbCouche, double* data, int colSizeData, int lineCountData, double *target, int colSizeTarget, int epoch) {
+
+		W = new double**[nbCouche + 1];//creer les couches + la première couche avec les data en "brut"
+
+		W[0] = new double*[colSizeData + 1];//creer la première couche "manuellement" 		
+
 		for (int i = 0; i < nbCouche; i++) {
-			W[i] = new double*[neuroneParCouche[i]];//creer les neurones dans chaque couche
+			W[i + 1] = new double*[neuroneParCouche[i] + 1];//creer les neurones dans chaque couche + le biais
 			for (int j = 0; j < neuroneParCouche[i]; j++) {
-				W[i][j] = new double(randomDouble(-1, 1));//init tout les poids entre -1 et 1
+
+				//init tout les poids entre -1 et 1
+				if (i == 0) {
+					W[i + 1][j] = new double[colSizeData + 1];
+					for (int k = 0; k < colSizeData + 1; k++) {
+						W[i + 1][j][k] = randomDouble(-1, 1);
+					}
+
+				}
+				else {
+					W[i + 1][j] = new double[neuroneParCouche[i - 1] + 1];
+					for (int k = 0; k < neuroneParCouche[i - 1] + 1; k++) {
+						W[i + 1][j][k] = randomDouble(-1, 1);
+					}
+				}
 			}
+
 		}
+		X = new double*[nbCouche + 1];//+1 rajoute la couche inital qui contient les données
+		X[0] = new double[colSizeData + 1];// il y as autant de neurone dans la première couche qu'il y as de données à analyser + le biais
+		X[0][colSizeData] = 1;//le biais est ici
+
+
+
+		//on met en place le tableaux de X
+		for (int j = 1; j < nbCouche; j++) {//on commence à 1 pour compter la couche qu'on a init avec les données de base
+
+			X[j] = new double[neuroneParCouche[j - 1] + 1];// neuroneparcouche +1 pour le biais et j-1 par ce que le tableau neuroneParCouche ne compte pas la première couche init avc les données brut
+			X[j][neuroneParCouche[j - 1]] = 1; //on met le biais qui se trouve à la fin de la couche à 1
+
+
+		}
+
+		for (int i = 0; i < lineCountData; i++) {// pour chaque ligne de donnée pour entrainer
+		//on remplie les neurones de la première couche avec les données de la ligne
+			for (int j = 0; j < colSizeData ; j++) {
+				X[0][j] = data[(i*lineCountData) + j];
+				
+			}
+			//TODO determiner les X des couches suivante
+			
+		}
+		//TODO determiner delta
+		//TODO lancer la backpropagation
+		//TODO arreter de boire
+
+		//les x[0] représente les resultat des neurone de la couche 0
+		//x[0][1] représente le resultat du neurone 1 de la couche 0
+		//pour determiner x[1][2] par exemple, fait la tanh de la somme ponderé de tout les x[0], multiplié par les poids de x[1][2]
+		//quand on as ateint le fond du reseau, sur les x[3] si on as 4 couche, on fais la backpropagation
+		//les y[n] sont les target attendu. il y as autant de n que de colones attendu en réponse, aka le nombre de neurone de sortie
 
 	}
 	__declspec(dllexport) int FitLinearClassification(double *model, double *arrayInputs, int inputsSize,
@@ -350,10 +404,12 @@ extern "C" {
 		fakeTarget[3] = 12.2;
 		fakeTarget[4] = 9.2;
 		fakeTarget[5] = 5;
-		fakeTarget[6] =2.5;
+		fakeTarget[6] = 2.5;
 		fakeTarget[7] = 0.4;
 		fakeTarget[8] = 9.2;
 		fakeTarget[9] = 7.6;
-		trainPCM(neuronesTest, 3, fakeData, 10, fakeTarget, 10);
+		trainPCM(neuronesTest, 3, fakeData, 10, 2, fakeTarget, 10, 10);
+		printf("compilation OK. appuyez sur ENTREE pour fermer...\n");
+		getchar();
 	}
 }
