@@ -525,16 +525,17 @@ extern "C" {
 		fakeTarget[0] = 1.2;
 		fakeTarget[1] = 7.2;
 
-		int* neuronebouboule = new int[1];
-		neuronebouboule[0] = 3;
+		int* neuronebouboule = new int[2];
+		neuronebouboule[0] = 4;
+		neuronebouboule[1] = 3;
 
 		double* fakedatabouboule = new double[6];
 		fakedatabouboule[0] = 1;
-		fakedatabouboule[0] = -6.05;
-		fakedatabouboule[0] = 7;
-		fakedatabouboule[0] = 5;
-		fakedatabouboule[0] = -5.98;
-		fakedatabouboule[0] = 5;
+		fakedatabouboule[1] = -6.05;
+		fakedatabouboule[2] = 7;
+		fakedatabouboule[3] = 5;
+		fakedatabouboule[4] = -5.98;
+		fakedatabouboule[5] = 5;
 
 		double *faketargetbouboule = new double[9];
 		faketargetbouboule[0] = 0;
@@ -548,7 +549,7 @@ extern "C" {
 		faketargetbouboule[8] = 0;
 
 		//trainPCM(neuronesTest, 4, fakeData, 2, 2, fakeTarget, 1, 5, .1, 0);
-		trainPCM(neuronebouboule, 1, fakedatabouboule, 2, 3, fakeTarget, 3, 10, .01, 1);
+		trainPCM(neuronebouboule,2, fakedatabouboule, 2, 3, faketargetbouboule, 3, 10, .01, 1);
 		double *test = new double[2];
 		test[0] = 9;
 		test[1] = 7;
