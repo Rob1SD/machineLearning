@@ -247,6 +247,7 @@ public class mainScript : MonoBehaviour
         int[] neuronesc = new int[] { 4, 3 };
 
 
+        IntPtr ptr = trainPCM(neuronesc, 2, arrayInputs, 2, tailleSphereToTrain, outputs, 3, 500, 0.01, true);
 
         //Debug.Log(array[0] + ", " + array[1] + ", " + array[2]);
 
@@ -255,6 +256,7 @@ public class mainScript : MonoBehaviour
             double[] array = usePCM(new double[] { sphere.position.x, sphere.position.z }, 2, ptr);
 
 
+            sphere.GetComponent<Renderer>().material.color = new Color((float)array[0], (float)array[1], (float)array[2], 1);
             Debug.Log(sphere.position.x + "x" + sphere.position.z + "y, rgb :" + array[0] + ", " + array[1] + ", " + array[2]);
         }
     }
