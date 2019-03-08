@@ -253,27 +253,63 @@ extern "C" {
 
 		return 1;
 	}
-
-	void usePCM(double* data, double *result, int nbData) {
-
-	}
-
 	double ***W;//les poids des neurones
 	double **X;//les valeurs des neurones
 	double **delta;//stock les delta
+	int* neuroneParCouche;
+	int nbCouche;
+	bool classifOrRegress;
+	double*  usePCM(double* data, int colSize) {
+
+		for (int j = 0; j < colSize; j++) {
+			X[0][j] = data[j];
+
+		}
+		for (int j = 0; j < nbCouche; j++) {
+		
+			if (j == 0) {//si on est sur la première couche caché, la couche précedante n'est pas contenue dans neuroneParCouche mais dans colSizeData
+				for (int k = 0; k < neuroneParCouche[j]; k++) {
+					if (classifOrRegress == 1) {
+						X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, colSize);
+					}
+					else {
+						X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, colSize);
+
+					}
+
+				}
+			}
+			else {
+				for (int k = 0; k < neuroneParCouche[j]; k++) {
+					if (classifOrRegress == 1) {
+						X[j + 1][k] = calulateX_j_l(j + 1, k, X, W, neuroneParCouche[j - 1]);
+					}
+					else {
+						X[j + 1][k] = calulateX_j_l_regression(j + 1, k, X, W, neuroneParCouche[j - 1]);
+
+					}
+				}
+			}
+		}
+		double* result = new double[neuroneParCouche[nbCouche - 1]];
+		for (int i = 0; i < neuroneParCouche[nbCouche - 1]; i++) {
+			result[i] = X[nbCouche ][i];
+		}
+		return result;
+	}
+
 	void resetNetwork() {
 		delete[] W;
 		delete[] X;
 		delete[] delta;
-
+		delete neuroneParCouche;
+		nbCouche = 0;
 	}
-
-	/*
-	trainPCM(neuronesTest, 4, fakeData, 10, 2, fakeTarget, 1, 5, .1, 0);
-	*/
-	__declspec(dllexport) void trainPCM(int *neuroneParCouche, int nbCouche, double* data, int colSizeData, int lineCountData,
-		double *target, int colSizeTarget, int epoch, double apprentissage, bool classifOrRegress) {
-
+	void trainPCM(int *_neuroneParCouche, int _nbCouche, double* data, int colSizeData, int lineCountData,
+		double *target, int colSizeTarget, int epoch, double apprentissage, bool _classifOrRegress) {
+		neuroneParCouche = _neuroneParCouche;
+		nbCouche = _nbCouche;
+		classifOrRegress = _classifOrRegress;
 		W = new double**[nbCouche + 1];//creer les couches + la première couche avec les data en "brut"
 
 		W[0] = new double*[colSizeData + 1];//creer la première couche "manuellement" 		
@@ -323,7 +359,6 @@ extern "C" {
 					X[0][j] = data[(i*lineCountData) + j];
 
 				}
-				//TODO determiner les X des couches suivante
 				for (int j = 0; j < nbCouche; j++) {
 					if (j == 0) {//si on est sur la première couche caché, la couche précedante n'est pas contenue dans neuroneParCouche mais dans colSizeData
 						for (int k = 0; k < neuroneParCouche[j]; k++) {
@@ -486,18 +521,38 @@ extern "C" {
 		fakeData[18] = 0.2;
 		fakeData[19] = 4.2;
 
-		double* fakeTarget = new double[10];
+		double* fakeTarget = new double[2];
 		fakeTarget[0] = 1.2;
 		fakeTarget[1] = 7.2;
-		fakeTarget[2] = 5.2;
-		fakeTarget[3] = 12.2;
-		fakeTarget[4] = 9.2;
-		fakeTarget[5] = 5;
-		fakeTarget[6] = 2.5;
-		fakeTarget[7] = 0.4;
-		fakeTarget[8] = 9.2;
-		fakeTarget[9] = 7.6;
-		trainPCM(neuronesTest, 4, fakeData, 10, 2, fakeTarget, 1, 5, .1, 0);
+
+		int* neuronebouboule = new int[1];
+		neuronebouboule[0] = 3;
+
+		double* fakedatabouboule = new double[6];
+		fakedatabouboule[0] = 1;
+		fakedatabouboule[0] = -6.05;
+		fakedatabouboule[0] = 7;
+		fakedatabouboule[0] = 5;
+		fakedatabouboule[0] = -5.98;
+		fakedatabouboule[0] = 5;
+
+		double *faketargetbouboule = new double[9];
+		faketargetbouboule[0] = 0;
+		faketargetbouboule[1] = 0;
+		faketargetbouboule[2] = 1;
+		faketargetbouboule[3] = 0;
+		faketargetbouboule[4] = 1;
+		faketargetbouboule[5] = 0;
+		faketargetbouboule[6] = 1;
+		faketargetbouboule[7] = 0;
+		faketargetbouboule[8] = 0;
+
+		//trainPCM(neuronesTest, 4, fakeData, 2, 2, fakeTarget, 1, 5, .1, 0);
+		trainPCM(neuronebouboule, 1, fakedatabouboule, 2, 3, fakeTarget, 3, 10, .01, 1);
+		double *test = new double[2];
+		test[0] = 9;
+		test[1] = 7;
+		double* result = usePCM(test, 2);
 		printf("compilation OK. appuyez sur ENTREE pour fermer...\n");
 		getchar();
 	}
